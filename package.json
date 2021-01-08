@@ -30,10 +30,21 @@
 			}
 		],
 		"views": {
-			"explorer": [
+			"astra-explorer": [
 				{
 					"id": "astra",
-					"name": "DataStax Astra"
+					"name": "DataStax Astra",
+					"icon": "resources/cassandra.svg",
+					"contextualTitle": "DataStax Astra Explorer"
+				}
+			]
+		},
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "astra-explorer",
+					"title": "DataStax Astra",
+					"icon": "resources/cassandra.svg"
 				}
 			]
 		},
