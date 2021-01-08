@@ -15,6 +15,12 @@
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
+		"viewsWelcome": [
+			{
+				"view": "astra-explorer",
+				"contents": "No connection found.\n[Connect Astra](command:astra-vscode.helloWorld)"
+			}
+		],
 		"commands": [
 			{
 				"command": "astra-vscode.helloWorld",
@@ -32,7 +38,7 @@
 		"views": {
 			"astra-explorer": [
 				{
-					"id": "astra",
+					"id": "astra-explorer",
 					"name": "DataStax Astra",
 					"icon": "resources/cassandra.svg",
 					"contextualTitle": "DataStax Astra Explorer"
