@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:astra-vscode.helloWorld"
+		"onCommand:astra-vscode.helloWorld",
+		"onView:astra"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
@@ -19,7 +20,15 @@
 				"command": "astra-vscode.helloWorld",
 				"title": "Hello World"
 			}
-		]
+		],
+		"views": {
+			"explorer": [
+				{
+					"id": "astra",
+					"name": "DataStax Astra"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
