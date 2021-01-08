@@ -77,6 +77,14 @@ export class NodeDependenciesProvider implements vscode.TreeDataProvider<Depende
         }
         return true;
     }
+
+    /** Refresh data */
+    private _onDidChangeTreeData: vscode.EventEmitter<Dependency | undefined | null | void> = new vscode.EventEmitter<Dependency | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<Dependency | undefined | null | void> = this._onDidChangeTreeData.event;
+
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
+    }
 }
 
 class Dependency extends vscode.TreeItem {

@@ -8,18 +8,18 @@ import { NodeDependenciesProvider } from './Provider';
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Starting Astra extension');
 
+	const provider = new NodeDependenciesProvider(vscode.workspace.rootPath);
 	vscode.window.registerTreeDataProvider(
 		'astra',
-		new NodeDependenciesProvider(vscode.workspace.rootPath)
+		provider
 	);
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('astra-vscode.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
 
-		// Display a message box to the user
+	let disposable = vscode.commands.registerCommand('astra-vscode.helloWorld', () => {
 		vscode.window.showInformationMessage('Hello World from Astra VSCode!');
+	});
+
+	vscode.commands.registerCommand('astra-vscode.refreshEntry', () => {
+		provider.refresh();
 	});
 
 	context.subscriptions.push(disposable);

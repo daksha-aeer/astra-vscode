@@ -19,6 +19,14 @@
 			{
 				"command": "astra-vscode.helloWorld",
 				"title": "Hello World"
+			},
+			{
+				"command": "astra-vscode.refreshEntry",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
 			}
 		],
 		"views": {
@@ -26,6 +34,15 @@
 				{
 					"id": "astra",
 					"name": "DataStax Astra"
+				}
+			]
+		},
+		"menus": {
+			"view/title": [
+				{
+					"command": "astra-vscode.refreshEntry",
+					"when": "view == astra",
+					"group": "navigation"
 				}
 			]
 		}
