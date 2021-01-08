@@ -11,14 +11,15 @@
 	],
 	"activationEvents": [
 		"onCommand:astra-vscode.helloWorld",
-		"onView:astra"
+		"onCommand:astra-vscode.readServiceCredentials",
+		"onView:astra-explorer"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"viewsWelcome": [
 			{
 				"view": "astra-explorer",
-				"contents": "No connection found.\n[Connect Astra](command:astra-vscode.helloWorld)"
+				"contents": "Connect to Astra using service account credentials. [Learn more.](https://docs.astra.datastax.com/docs/manage-service-account)\n[Connect Astra](command:astra-vscode.readServiceCredentials)"
 			}
 		],
 		"commands": [
@@ -33,6 +34,10 @@
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
 				}
+			},
+			{
+				"command": "astra-vscode.readServiceCredentials",
+				"title": "Set service credentials"
 			}
 		],
 		"views": {
@@ -58,7 +63,7 @@
 			"view/title": [
 				{
 					"command": "astra-vscode.refreshEntry",
-					"when": "view == astra",
+					"when": "view == astra-explorer",
 					"group": "navigation"
 				}
 			]
