@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { LocalStorageService } from './LocalStorageService';
 import { NodeDependenciesProvider } from './Provider';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -24,6 +25,11 @@ export function activate(context: vscode.ExtensionContext) {
 		try {
 			const serviceCredentials: typeof sampleCredentials = JSON.parse(userInput!);
 			console.log('Got', serviceCredentials);
+
+			const storage = new LocalStorageService(context.globalState);
+			storage.setValue('clientId', serviceCredentials.clientId);
+			storage.setValue('clientName', serviceCredentials.clientName);
+			storage.setValue('clientSecret', serviceCredentials.clientSecret);
 		} catch (error) {
 			vscode.window.showErrorMessage('Invalid credentials!')
 		}
