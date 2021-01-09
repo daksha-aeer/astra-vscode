@@ -11,8 +11,9 @@
 	],
 	"activationEvents": [
 		"onCommand:astra-vscode.helloWorld",
-		"onCommand:astra-vscode.readServiceCredentials",
-		"onCommand:astra-vscode.connectAstraDevOpsApi",
+		"onCommand:astra-vscode.setServiceCredentials",
+		"onCommand:astra-vscode.refreshDevOpsToken",
+		"astra-vscode.refreshUserDatabases",
 		"onView:astra-explorer"
 	],
 	"main": "./dist/extension.js",
@@ -20,7 +21,7 @@
 		"viewsWelcome": [
 			{
 				"view": "astra-explorer",
-				"contents": "Connect to Astra using service account credentials. [Learn more.](https://docs.astra.datastax.com/docs/manage-service-account)\n[Connect Astra](command:astra-vscode.readServiceCredentials)"
+				"contents": "Connect to Astra using service account credentials. [Learn more.](https://docs.astra.datastax.com/docs/manage-service-account)\n[Connect Astra](command:astra-vscode.setServiceCredentials)"
 			}
 		],
 		"commands": [
@@ -37,12 +38,16 @@
 				}
 			},
 			{
-				"command": "astra-vscode.readServiceCredentials",
+				"command": "astra-vscode.setServiceCredentials",
 				"title": "Set service credentials"
 			},
 			{
-				"command": "astra-vscode.connectAstraDevOpsApi",
-				"title": "Connect to DevOps API"
+				"command": "astra-vscode.refreshDevOpsToken",
+				"title": "Refresh DevOps token"
+			},
+			{
+				"command": "astra-vscode.refreshUserDatabases",
+				"title": "Refresh databases"
 			}
 		],
 		"views": {
