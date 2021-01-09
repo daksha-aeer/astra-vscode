@@ -39,7 +39,7 @@ class TreeItem extends vscode.TreeItem {
     }
 
     iconPath = {
-        light: path.join(__filename, '..', '..', 'resources', 'light', 'refresh.svg'),
-        dark: path.join(__filename, '..', '..', 'resources', 'dark', 'refresh.svg')
+        light: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'Database.svg'),
+        dark: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'Database.svg'),
     };
 }
