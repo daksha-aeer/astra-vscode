@@ -14,13 +14,13 @@
 		"onCommand:astra-vscode.setServiceCredentials",
 		"onCommand:astra-vscode.refreshDevOpsToken",
 		"astra-vscode.refreshUserDatabases",
-		"onView:astra-explorer"
+		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"viewsWelcome": [
 			{
-				"view": "astra-explorer",
+				"view": "databases-view",
 				"contents": "Connect to Astra using service account credentials. [Learn more.](https://docs.astra.datastax.com/docs/manage-service-account)\n[Connect Astra](command:astra-vscode.setServiceCredentials)"
 			}
 		],
@@ -47,19 +47,21 @@
 			}
 		],
 		"views": {
-			"astra-explorer": [
+			"astra-extension-container": [
 				{
-					"id": "astra-explorer",
-					"name": "DataStax Astra",
-					"icon": "resources/cassandra.svg",
-					"contextualTitle": "DataStax Astra Explorer"
+					"id": "databases-view",
+					"name": "Databases"
+				},
+				{
+					"id": "astra-playgrounds",
+					"name": "Playgrounds"
 				}
 			]
 		},
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "astra-explorer",
+					"id": "astra-extension-container",
 					"title": "DataStax Astra",
 					"icon": "resources/cassandra.svg"
 				}
@@ -69,7 +71,7 @@
 			"view/title": [
 				{
 					"command": "astra-vscode.refreshUserDatabases",
-					"when": "view == astra-explorer",
+					"when": "view == databases-view",
 					"group": "navigation"
 				}
 			]
