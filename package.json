@@ -30,14 +30,6 @@
 				"title": "Hello World"
 			},
 			{
-				"command": "astra-vscode.refreshEntry",
-				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
-				}
-			},
-			{
 				"command": "astra-vscode.setServiceCredentials",
 				"title": "Set service credentials"
 			},
@@ -47,7 +39,11 @@
 			},
 			{
 				"command": "astra-vscode.refreshUserDatabases",
-				"title": "Refresh databases"
+				"title": "Refresh databases",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
 			}
 		],
 		"views": {
@@ -72,7 +68,7 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "astra-vscode.refreshEntry",
+					"command": "astra-vscode.refreshUserDatabases",
 					"when": "view == astra-explorer",
 					"group": "navigation"
 				}

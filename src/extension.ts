@@ -3,13 +3,11 @@ import fetch from 'cross-fetch';
 import Provider from './Provider';
 import { Database } from './types';
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	let devOpsToken: string | null = null;
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
-	vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 
-	// const provider = new NodeDependenciesProvider(vscode.workspace.rootPath);
 	const provider = new Provider([]);
 	vscode.window.registerTreeDataProvider(
 		'astra-explorer',
@@ -29,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 		await context.globalState.update('serviceCredentials', userInput);
 
-		vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
+		await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	});
 
 	vscode.commands.registerCommand('astra-vscode.refreshDevOpsToken', async () => {
@@ -66,11 +64,11 @@ export function activate(context: vscode.ExtensionContext) {
 		console.log('Fetched databases', JSON.stringify(databases));
 
 		provider.refresh(databases);
+		vscode.window.showInformationMessage('Token refreshed');
 	})
 
-	vscode.commands.registerCommand('astra-vscode.refreshEntry', () => {
-		// provider.refresh();
-	});
+	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
+	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 }
 
 export function deactivate() { }
