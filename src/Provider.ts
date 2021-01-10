@@ -16,6 +16,11 @@ export default class Provider implements vscode.TreeDataProvider<TreeItem> {
                 command: 'astra-vscode.openUrlInBrowser',
                 arguments: [database.studioUrl],
             }),
+            new TreeItem('Grafana', {
+                title: 'Monitor database health on Grafana',
+                command: 'astra-vscode.openUrlInBrowser',
+                arguments: [database.grafanaUrl],
+            }),
             new TreeItem('GraphQL schema', {
                 title: 'GraphQL schema',
                 command: 'astra-vscode.openGraphQLInWebview',
