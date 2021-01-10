@@ -1,7 +1,11 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as util from 'util';
 import fetch from 'cross-fetch';
 import Provider from './Provider';
 import { Database } from './types';
+const readFile = util.promisify(fs.readFile);
 
 export async function activate(context: vscode.ExtensionContext) {
 	let devOpsToken: string | null = null;
@@ -70,6 +74,20 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('astra-vscode.openUrlInBrowser', (url: string) => {
 		console.log('Got URL', url);
 		vscode.env.openExternal(vscode.Uri.parse(url));
+	});
+
+	vscode.commands.registerCommand('astra-vscode.openFileInWebview', async (url: string) => {
+		const panel = vscode.window.createWebviewPanel(
+			'catCoding',
+			'Cat Coding',
+			vscode.ViewColumn.One,
+			{}
+		);
+
+		const filePath = path.join(context.extensionPath, 'src', 'webviews', 'main.html');
+		const html = await readFile(filePath);
+		console.log('Read HTML', html.toString());
+		panel.webview.html = html.toString();
 	});
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');

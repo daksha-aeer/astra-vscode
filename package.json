@@ -13,6 +13,7 @@
 		"onCommand:astra-vscode.helloWorld",
 		"onCommand:astra-vscode.setServiceCredentials",
 		"onCommand:astra-vscode.refreshDevOpsToken",
+		"onCommand:astra-vscode.openFileInWebview",
 		"astra-vscode.refreshUserDatabases",
 		"onView:databases-view"
 	],
@@ -47,7 +48,11 @@
 			},
 			{
 				"command": "astra-vscode.openUrlInBrowser",
-				"title": "Open GraphQL"
+				"title": "Open in browser"
+			},
+			{
+				"command": "astra-vscode.openFileInWebview",
+				"title": "Open in webview"
 			}
 		],
 		"views": {

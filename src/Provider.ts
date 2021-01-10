@@ -15,7 +15,11 @@ export default class Provider implements vscode.TreeDataProvider<TreeItem> {
                 title: 'Launch DataStax Studio',
                 command: 'astra-vscode.openUrlInBrowser',
                 arguments: [database.studioUrl],
-            })
+            }),
+            new TreeItem('GraphQL', {
+                title: 'GraphQL explorer',
+                command: 'astra-vscode.openFileInWebview',
+            }),
         ]));
         this._onDidChangeTreeData.fire();
     }
