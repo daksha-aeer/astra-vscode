@@ -67,8 +67,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Token refreshed');
 	})
 
-	vscode.commands.registerCommand('astra-vscode.openGraphQL', () => {
-		vscode.window.showInformationMessage('Launching GraphQL GG');
+	vscode.commands.registerCommand('astra-vscode.openUrlInBrowser', (url: string) => {
+		console.log('Got URL', url);
+		vscode.env.openExternal(vscode.Uri.parse(url));
 	});
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');

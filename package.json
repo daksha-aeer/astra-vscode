@@ -46,7 +46,7 @@
 				}
 			},
 			{
-				"command": "astra-vscode.openGraphQL",
+				"command": "astra-vscode.openUrlInBrowser",
 				"title": "Open GraphQL"
 			}
 		],

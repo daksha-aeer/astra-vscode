@@ -11,9 +11,10 @@ export default class Provider implements vscode.TreeDataProvider<TreeItem> {
 
     refresh(databases: Database[]) {
         this.data = databases.map((database) => new TreeItem(database.info.name, undefined, [
-            new TreeItem('GraphQL', {
-                title: 'Launch GraphQL',
-                command: 'astra-vscode.openGraphQL',
+            new TreeItem('DataStax Studio', {
+                title: 'Launch DataStax Studio',
+                command: 'astra-vscode.openUrlInBrowser',
+                arguments: [database.studioUrl],
             })
         ]));
         this._onDidChangeTreeData.fire();
