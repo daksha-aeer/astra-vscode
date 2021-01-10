@@ -81,13 +81,17 @@ export async function activate(context: vscode.ExtensionContext) {
 			'catCoding',
 			'Cat Coding',
 			vscode.ViewColumn.One,
-			{}
+			{
+				enableScripts: true,
+			}
 		);
 
 		const filePath = path.join(context.extensionPath, 'src', 'webviews', 'main.html');
-		const html = await readFile(filePath);
-		console.log('Read HTML', html.toString());
-		panel.webview.html = html.toString();
+		const fileContents = await readFile(filePath);
+		const html = fileContents.toString()
+			.replace('{{endpoint}}', 'endpoint')
+		console.log('Read HTML', html);
+		panel.webview.html = html;
 	});
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
