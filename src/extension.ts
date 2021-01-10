@@ -65,7 +65,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				Authorization: "Bearer " + devOpsToken,
 			}
 		}).then(res => res.json());
-		console.log('Fetched databases', JSON.stringify(databases));
+		console.log('Fetched databases', databases);
 
 		provider.refresh(databases);
 		vscode.window.showInformationMessage('Token refreshed');
@@ -76,21 +76,35 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.env.openExternal(vscode.Uri.parse(url));
 	});
 
-	vscode.commands.registerCommand('astra-vscode.openFileInWebview', async (url: string) => {
+	vscode.commands.registerCommand('astra-vscode.openGraphQLInWebview', async (url: string) => {
 		const panel = vscode.window.createWebviewPanel(
-			'catCoding',
-			'Cat Coding',
+			'graphQLPlayground',
+			'GraphQL Playground',
 			vscode.ViewColumn.One,
 			{
 				enableScripts: true,
 			}
 		);
 
-		const filePath = path.join(context.extensionPath, 'src', 'webviews', 'main.html');
+		const filePath = path.join(context.extensionPath, 'src', 'webviews', 'graphql-playground.html');
 		const fileContents = await readFile(filePath);
-		const html = fileContents.toString()
-			.replace('{{endpoint}}', 'endpoint')
-		console.log('Read HTML', html);
+		const html = fileContents.toString().replace('{{url}}', url);
+		panel.webview.html = html;
+	});
+
+	vscode.commands.registerCommand('astra-vscode.openSwaggerInWebview', async (url: string) => {
+		const panel = vscode.window.createWebviewPanel(
+			'swagger',
+			'Swagger UI',
+			vscode.ViewColumn.One,
+			{
+				enableScripts: true,
+			}
+		);
+
+		const filePath = path.join(context.extensionPath, 'src', 'webviews', 'swagger-ui.html');
+		const fileContents = await readFile(filePath);
+		const html = fileContents.toString().replace('{{url}}', url);
 		panel.webview.html = html;
 	});
 

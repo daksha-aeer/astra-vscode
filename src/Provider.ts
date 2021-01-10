@@ -16,9 +16,15 @@ export default class Provider implements vscode.TreeDataProvider<TreeItem> {
                 command: 'astra-vscode.openUrlInBrowser',
                 arguments: [database.studioUrl],
             }),
-            new TreeItem('GraphQL', {
-                title: 'GraphQL explorer',
-                command: 'astra-vscode.openFileInWebview',
+            new TreeItem('GraphQL schema', {
+                title: 'GraphQL schema',
+                command: 'astra-vscode.openGraphQLInWebview',
+                arguments: [`${database.graphqlUrl}-schema`],
+            }),
+            new TreeItem('Swagger UI for REST', {
+                title: 'Swagger UI for REST',
+                command: 'astra-vscode.openSwaggerInWebview',
+                arguments: [`https://${database.id}-${database.info.region}.apps.astra.datastax.com/api/rest/swagger.json`],
             }),
         ]));
         this._onDidChangeTreeData.fire();

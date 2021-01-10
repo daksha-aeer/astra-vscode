@@ -2,7 +2,7 @@ type Database = {
     id: string,
     info: {
         name: string,
-
+        region: string,
         keyspace: string,
         additionalKeyspaces: [string],
     },

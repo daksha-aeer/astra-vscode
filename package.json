@@ -13,7 +13,8 @@
 		"onCommand:astra-vscode.helloWorld",
 		"onCommand:astra-vscode.setServiceCredentials",
 		"onCommand:astra-vscode.refreshDevOpsToken",
-		"onCommand:astra-vscode.openFileInWebview",
+		"onCommand:astra-vscode.openGraphQLInWebview",
+		"onCommand:astra-vscode.openSwaggerInWebview",
 		"astra-vscode.refreshUserDatabases",
 		"onView:databases-view"
 	],
@@ -51,8 +52,12 @@
 				"title": "Open in browser"
 			},
 			{
-				"command": "astra-vscode.openFileInWebview",
-				"title": "Open in webview"
+				"command": "astra-vscode.openGraphQLInWebview",
+				"title": "Launch GraphQL Playground"
+			},
+			{
+				"command": "astra-vscode.openSwaggerInWebview",
+				"title": "Launch Swagger UI"
 			}
 		],
 		"views": {
