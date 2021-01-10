@@ -44,6 +44,10 @@
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
 				}
+			},
+			{
+				"command": "astra-vscode.openGraphQL",
+				"title": "Open GraphQL"
 			}
 		],
 		"views": {

@@ -7,14 +7,15 @@ export default class Provider implements vscode.TreeDataProvider<TreeItem> {
     private _onDidChangeTreeData = new vscode.EventEmitter<TreeItem | undefined | null | void>();
     readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-    data: TreeItem[];
-
-    constructor(databases: Database[]) {
-        this.data = databases.map((database) => new TreeItem(database))
-    }
+    data?: TreeItem[];
 
     refresh(databases: Database[]) {
-        this.data = databases.map((database) => new TreeItem(database));
+        this.data = databases.map((database) => new TreeItem(database.info.name, undefined, [
+            new TreeItem('GraphQL', {
+                title: 'Launch GraphQL',
+                command: 'astra-vscode.openGraphQL',
+            })
+        ]));
         this._onDidChangeTreeData.fire();
     }
 
@@ -22,20 +23,27 @@ export default class Provider implements vscode.TreeDataProvider<TreeItem> {
         return element;
     }
 
-    getChildren(element?: TreeItem | undefined): vscode.ProviderResult<TreeItem[]> {
+    getChildren(element?: TreeItem): vscode.ProviderResult<TreeItem[]> {
         if (element === undefined) {
             return this.data;
         }
-        // return element.children;
+        console.log('Returning children', element.children);
+        return element.children;
     }
 }
 
 class TreeItem extends vscode.TreeItem {
-    // children: TreeItem[] | undefined;
-    database: Database;
-    constructor(database: Database) {
-        super(database.info.name);
-        this.database = database;
+    children?: TreeItem[];
+    command?: vscode.Command;
+
+    constructor(label: string, command?: vscode.Command, children?: TreeItem[]) {
+        super(label,
+            children === undefined ?
+                vscode.TreeItemCollapsibleState.None :
+                vscode.TreeItemCollapsibleState.Expanded
+        );
+        this.children = children;
+        this.command = command;
     }
 
     iconPath = {

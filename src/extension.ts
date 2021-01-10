@@ -8,7 +8,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
 
-	const provider = new Provider([]);
+	const provider = new Provider();
 	vscode.window.registerTreeDataProvider(
 		'databases-view',
 		provider
@@ -66,6 +66,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		provider.refresh(databases);
 		vscode.window.showInformationMessage('Token refreshed');
 	})
+
+	vscode.commands.registerCommand('astra-vscode.openGraphQL', () => {
+		vscode.window.showInformationMessage('Launching GraphQL GG');
+	});
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
