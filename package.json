@@ -17,6 +17,7 @@
 		"onCommand:astra-vscode.openSwaggerInWebview",
 		"onCommand:astra-vscode.openCqlsh",
 		"onCommand:astra-vscode.refreshUserDatabases",
+		"onCommand:astra-vscode.connectToDatabase",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -46,6 +47,14 @@
 				"icon": {
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "astra-vscode.connectToDatabase",
+				"title": "Connect to database",
+				"icon": {
+					"light": "resources/light/plug.svg",
+					"dark": "resources/dark/plug.svg"
 				}
 			},
 			{
@@ -92,6 +101,13 @@
 					"command": "astra-vscode.refreshUserDatabases",
 					"when": "view == databases-view",
 					"group": "navigation"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "astra-vscode.connectToDatabase",
+					"when": "view == databases-view && viewItem == database",
+					"group": "inline"
 				}
 			]
 		}

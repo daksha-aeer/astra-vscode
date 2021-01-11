@@ -3,12 +3,13 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
 import fetch from 'cross-fetch';
-import Provider from './Provider';
+import { Provider, AstraTreeItem } from './Provider';
 import { Database } from './types';
 const readFile = util.promisify(fs.readFile);
 
 export async function activate(context: vscode.ExtensionContext) {
 	let devOpsToken: string | null = null;
+	let authTokens: { [key: string]: string } = {};
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
 
@@ -108,6 +109,53 @@ export async function activate(context: vscode.ExtensionContext) {
 		panel.webview.html = html;
 	});
 
+	vscode.commands.registerCommand('astra-vscode.connectToDatabase', async (databaseTreeItem: AstraTreeItem) => {
+		console.log('got parm', databaseTreeItem);
+		const database = databaseTreeItem.database!!;
+		console.log('got database', database);
+		const id = database.id;
+		console.log('got id', id);
+		try {
+			let password = context.globalState.get<string>(`passwords.${id}`);
+			let savePassword = false;
+			console.log('Retrieved password', password);
+
+			if (!password) {
+				savePassword = true;
+				password = await vscode.window.showInputBox({
+					prompt: 'Database password',
+				})
+				console.log('input password', password);
+			}
+
+			const response = await fetch(`https://${database.id}-${database.info.region}.apps.astra.datastax.com/api/rest/v1/auth`, {
+				method: 'POST',
+				headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					username: database.info.user,
+					password
+				}),
+			});
+			const result = await response.json();
+			console.log('Token result', result);
+
+			const authToken: string | null = result.authToken;
+			console.log('Got auth token', authToken);
+			if (authToken === undefined) {
+				vscode.window.showErrorMessage('Invalid password, try again!');
+				context.globalState.update(`passwords.${id}`, undefined); // remove saved password
+			} else {
+				if (savePassword) {
+					await context.globalState.update(`passwords.${id}`, password);
+				}
+				authTokens[id] = result.authtoken;
+				provider.displayConnectedDatabaseOptions(id);
+			}
+
+		} catch (error) {
+			vscode.window.showErrorMessage('Failed to connect');
+		}
+	})
 	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (user: string) => {
 		try {
 			const password = await vscode.window.showInputBox({
