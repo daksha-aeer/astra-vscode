@@ -15,7 +15,8 @@
 		"onCommand:astra-vscode.refreshDevOpsToken",
 		"onCommand:astra-vscode.openGraphQLInWebview",
 		"onCommand:astra-vscode.openSwaggerInWebview",
-		"astra-vscode.refreshUserDatabases",
+		"onCommand:astra-vscode.openCqlsh",
+		"onCommand:astra-vscode.refreshUserDatabases",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -58,6 +59,10 @@
 			{
 				"command": "astra-vscode.openSwaggerInWebview",
 				"title": "Launch Swagger UI"
+			},
+			{
+				"command": "astra-vscode.openCqlsh",
+				"title": "Launch CQL Console"
 			}
 		],
 		"views": {

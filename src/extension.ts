@@ -108,6 +108,22 @@ export async function activate(context: vscode.ExtensionContext) {
 		panel.webview.html = html;
 	});
 
+	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (user: string) => {
+		try {
+			const password = await vscode.window.showInputBox({
+				prompt: 'Database password',
+			})
+			// Path is relative to user's current directory
+			// Bundle is unique for each DB
+			const filePath = './cqlsh-trial';
+			const shell = vscode.window.createTerminal('CQL shell');
+			shell.sendText(`cqlsh -u ${user} -p ${password} -b ${filePath}`);
+			shell.show();
+		} catch (error) {
+			vscode.window.showErrorMessage('Path to shell executable "cqlsh" does not exist.');
+		}
+	});
+
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 }
