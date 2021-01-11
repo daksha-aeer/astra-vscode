@@ -31,6 +31,11 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 command: 'astra-vscode.openSwaggerInWebview',
                 arguments: [`https://${database.id}-${database.info.region}.apps.astra.datastax.com/api/rest/swagger.json`],
             }),
+            new AstraTreeItem('Download Secure Bundle', {
+                title: 'Download Secure Bundle',
+                command: 'astra-vscode.downloadSecureConnectBundle',
+                arguments: [database.id],
+            }),
         ], 'database', database));
         this._onDidChangeTreeData.fire();
     }

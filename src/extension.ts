@@ -163,6 +163,19 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Token copied to clipboard');
 	});
 
+	vscode.commands.registerCommand('astra-vscode.downloadSecureConnectBundle', async (id: string) => {
+		try {
+			const response = await fetch(`https://api.astra.datastax.com/v2/databases/${id}/secureBundleURL`, {
+				method: 'POST',
+				headers: { Accept: 'application/json', Authorization: `Bearer ${devOpsToken}` },
+			}).then(res => res.json());
+
+			await vscode.commands.executeCommand('astra-vscode.openUrlInBrowser', response.downloadURL);
+		} catch (error) {
+			vscode.window.showErrorMessage('Failed to get bundle link');
+		}
+	});
+
 	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (user: string) => {
 		try {
 			const password = await vscode.window.showInputBox({

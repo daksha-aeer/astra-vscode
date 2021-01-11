@@ -19,6 +19,7 @@
 		"onCommand:astra-vscode.refreshUserDatabases",
 		"onCommand:astra-vscode.connectToDatabase",
 		"onCommand:astra-vscode.copyDatabaseAuthToken",
+		"onCommand:astra-vscode.downloadSecureConnectBundle",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -77,6 +78,10 @@
 			{
 				"command": "astra-vscode.copyDatabaseAuthToken",
 				"title": "Copy auth token"
+			},
+			{
+				"command": "astra-vscode.downloadSecureConnectBundle",
+				"title": "Download secure auth bundle"
 			}
 		],
 		"views": {
