@@ -16,4 +16,8 @@ type Database = {
     dataEndpointUrl: string,
 }
 
-export { Database }
+type BundleResponse = {
+    downloadURL: string
+}
+
+export { Database, BundleResponse }

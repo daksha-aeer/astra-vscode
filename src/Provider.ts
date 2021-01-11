@@ -55,6 +55,11 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                         title: 'Copy auth token',
                         command: 'astra-vscode.copyDatabaseAuthToken',
                         arguments: [id],
+                    }),
+                    new AstraTreeItem('Launch CQL Shell', {
+                        title: 'Launch CQL Shell',
+                        command: 'astra-vscode.openCqlsh',
+                        arguments: [treeItem.database],
                     })
                 )
                 return treeItem;

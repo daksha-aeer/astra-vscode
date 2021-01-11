@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as util from 'util';
 import fetch from 'cross-fetch';
 import { Provider, AstraTreeItem } from './Provider';
-import { Database } from './types';
+import { BundleResponse, Database } from './types';
 const readFile = util.promisify(fs.readFile);
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -176,20 +176,45 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (user: string) => {
-		try {
-			const password = await vscode.window.showInputBox({
-				prompt: 'Database password',
-			})
-			// Path is relative to user's current directory
-			// Bundle is unique for each DB
-			const filePath = './cqlsh-trial';
-			const shell = vscode.window.createTerminal('CQL shell');
-			shell.sendText(`cqlsh -u ${user} -p ${password} -b ${filePath}`);
-			shell.show();
-		} catch (error) {
-			vscode.window.showErrorMessage('Path to shell executable "cqlsh" does not exist.');
+	async function getSecureBundle(id: string): Promise<BundleResponse> {
+		return await fetch(`https://api.astra.datastax.com/v2/databases/${id}/secureBundleURL`, {
+			method: 'POST',
+			headers: { Accept: 'application/json', Authorization: `Bearer ${devOpsToken}` },
+		}).then(res => res.json());
+	}
+
+	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (database: Database) => {
+		// Check if bundle exists
+		const bundleName = `secure-bundle-${database.info.name}.zip`;
+		const bundleLocation = context.globalStorageUri.with({
+			path: path.posix.join(context.globalStorageUri.path, bundleName)
+		});
+
+		const bundles = await vscode.workspace.fs.readDirectory(context.globalStorageUri);
+		console.log('Read bundles', bundles.toString());
+
+		let bundlePresent = false;
+		for (const [name, type] of bundles) {
+			if (name === bundleName && type === vscode.FileType.File) {
+				bundlePresent = true;
+			}
 		}
+		console.log('Bundle found', bundlePresent);
+
+		// Download bundle if not present
+		if (!bundlePresent) {
+			const bundleResponse = await getSecureBundle(database.id);
+			const secureBundleURL = bundleResponse.downloadURL;
+			const response = await fetch(secureBundleURL);
+			const buffer = Buffer.from(await response.arrayBuffer());
+			await vscode.workspace.fs.writeFile(bundleLocation, buffer);
+		}
+
+		// Run cqlsh
+		const password = context.globalState.get<string>(`passwords.${database.id}`)!;
+		const shell = vscode.window.createTerminal('CQL shell');
+		shell.sendText(`cqlsh -u ${database.info.user} -p ${password} -b "${bundleLocation.path}"`);
+		shell.show();
 	});
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
