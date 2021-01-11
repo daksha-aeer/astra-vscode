@@ -148,7 +148,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				if (savePassword) {
 					await context.globalState.update(`passwords.${id}`, password);
 				}
-				authTokens[id] = result.authtoken;
+				authTokens[id] = authToken!;
 				provider.displayConnectedDatabaseOptions(id);
 			}
 
@@ -156,6 +156,13 @@ export async function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage('Failed to connect');
 		}
 	})
+
+	vscode.commands.registerCommand('astra-vscode.copyDatabaseAuthToken', async (id: string) => {
+		console.log('saved tokens', authTokens);
+		await vscode.env.clipboard.writeText(authTokens[id]);
+		vscode.window.showInformationMessage('Token copied to clipboard');
+	});
+
 	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (user: string) => {
 		try {
 			const password = await vscode.window.showInputBox({

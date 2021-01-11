@@ -18,6 +18,7 @@
 		"onCommand:astra-vscode.openCqlsh",
 		"onCommand:astra-vscode.refreshUserDatabases",
 		"onCommand:astra-vscode.connectToDatabase",
+		"onCommand:astra-vscode.copyDatabaseAuthToken",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -72,6 +73,10 @@
 			{
 				"command": "astra-vscode.openCqlsh",
 				"title": "Launch CQL Console"
+			},
+			{
+				"command": "astra-vscode.copyDatabaseAuthToken",
+				"title": "Copy auth token"
 			}
 		],
 		"views": {

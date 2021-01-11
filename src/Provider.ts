@@ -46,9 +46,11 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     dark: path.join(__filename, '..', '..', 'resources', 'dark', 'ConnectPlugged.svg'),
                 };
                 treeItem.children?.push(
-                    new AstraTreeItem(
-                        'Copy auth token'
-                    )
+                    new AstraTreeItem('Copy auth token', {
+                        title: 'Copy auth token',
+                        command: 'astra-vscode.copyDatabaseAuthToken',
+                        arguments: [id],
+                    })
                 )
                 return treeItem;
             }
