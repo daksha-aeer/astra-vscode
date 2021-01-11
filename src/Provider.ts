@@ -42,7 +42,8 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
     displayConnectedDatabaseOptions(id: string) {
         this.data = this.data?.map((treeItem) => {
-            const currentDbId = treeItem.database?.id;
+            const database = treeItem.database!;
+            const currentDbId = database.id;
             if (currentDbId === id) {
                 console.log('Replacing context value');
                 treeItem.contextValue = 'database-connected';
@@ -50,18 +51,22 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     light: path.join(__filename, '..', '..', 'resources', 'light', 'ConnectPlugged.svg'),
                     dark: path.join(__filename, '..', '..', 'resources', 'dark', 'ConnectPlugged.svg'),
                 };
-                treeItem.children?.push(
-                    new AstraTreeItem('Copy auth token', {
-                        title: 'Copy auth token',
-                        command: 'astra-vscode.copyDatabaseAuthToken',
-                        arguments: [id],
-                    }),
-                    new AstraTreeItem('Launch CQL Shell', {
-                        title: 'Launch CQL Shell',
-                        command: 'astra-vscode.openCqlsh',
-                        arguments: [treeItem.database],
-                    })
-                )
+                const copyTokenItem = new AstraTreeItem('Copy auth token', {
+                    title: 'Copy auth token',
+                    command: 'astra-vscode.copyDatabaseAuthToken',
+                    arguments: [id],
+                });
+                const launchCqlShellItem = new AstraTreeItem('Launch CQL Shell', {
+                    title: 'Launch CQL Shell',
+                    command: 'astra-vscode.openCqlsh',
+                    arguments: [treeItem.database],
+                });
+                const keyspaceItems = database.info.keyspaces.map((keyspace) => {
+                    return new AstraTreeItem(keyspace);
+                })
+
+                treeItem.children = [...treeItem.children!, copyTokenItem, launchCqlShellItem, ...keyspaceItems];
+
                 return treeItem;
             }
             return treeItem;
