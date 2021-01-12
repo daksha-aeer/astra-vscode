@@ -41,24 +41,31 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     arguments: [database.grafanaUrl],
                 }),
             ]
+
+            const keyspaceItems = database.info.keyspaces.map((keyspace) => {
+                const keyspaceItem = new AstraTreeItem(keyspace, {
+                    title: 'Show tables',
+                    command: 'astra-vscode.getTablesInKeyspace',
+                    arguments: [database, keyspace],
+                });
+                keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                return keyspaceItem;
+            })
+
             return new AstraTreeItem(database.info.name, undefined, [
                 new AstraTreeItem('API', undefined, apiChildren),
                 new AstraTreeItem('Manage', undefined, manageDatabaseChildren),
+                new AstraTreeItem('Keyspaces', undefined, keyspaceItems),
+
             ], 'database', database)
         });
         this._onDidChangeTreeData.fire();
     }
 
     displayConnectedDatabaseOptions(connectedDbId: string) {
-        const dbIndex = this.data!.findIndex((dbItem) => {
-            return dbItem.database?.id === connectedDbId;
-        })!;
-        const apiGroupIndex = this.data![dbIndex].children!.findIndex((dbActionItem) => {
-            return dbActionItem.label === 'API';
-        })!;
-        const manageGroupIndex = this.data![dbIndex].children!.findIndex((dbActionItem) => {
-            return dbActionItem.label === 'Manage';
-        })!;
+        const dbIndex = this.findDbItemIndex(connectedDbId);
+        const apiGroupIndex = this.findGroupIndex(dbIndex, 'API');
+        const manageGroupIndex = this.findGroupIndex(dbIndex, 'Manage');
 
         this.data![dbIndex].children![apiGroupIndex].children!.push(
             new AstraTreeItem('Copy auth token', {
@@ -93,7 +100,6 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                             console.log('Got table', table);
                             return new AstraTreeItem(table.name);
                         })
-
                     }
                     return databaseChild;
                 })
@@ -113,6 +119,19 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         }
         console.log('Returning children', element.children);
         return element.children;
+    }
+
+    // Utils
+    findDbItemIndex(databaseId: string) {
+        return this.data!.findIndex((dbItem) => {
+            return dbItem.database?.id === databaseId;
+        })
+    }
+
+    findGroupIndex(databaseIndex: number, groupName: string) {
+        return this.data![databaseIndex].children!.findIndex((dbActionItem) => {
+            return dbActionItem.label === groupName;
+        });
     }
 }
 
