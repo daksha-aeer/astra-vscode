@@ -95,9 +95,17 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         this.data![dbIndex].children![keyspacesGroupIndex].children?.map((keyspaceItem) => {
             if (keyspaceItem.label === keyspace) {
                 if (tables.length > 0) {
-                    keyspaceItem.children = tables.map((table) => {
+                    keyspaceItem.children = tables.map((table, index) => {
                         console.log('Got table', table);
-                        return new AstraTreeItem(table.name);
+                        const tableItem = new AstraTreeItem(table.name, undefined, [
+                            new AstraTreeItem('Schema'),
+                            new AstraTreeItem('Documents'),
+                        ]);
+                        if (index !== 0) {
+                            tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                        }
+
+                        return tableItem;
                     })
                 } else {
                     keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
