@@ -80,6 +80,28 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         this._onDidChangeTreeData.fire();
     }
 
+    displayTablesInKeyspace(databaseId: string, keyspace: string, tables: { name: string }[]) {
+        this.data = this.data?.map((treeItem) => {
+            const database = treeItem.database!;
+            const currentDbId = database.id;
+            if (currentDbId === databaseId) {
+                treeItem.children = treeItem.children?.map((databaseChild) => {
+                    if (databaseChild.label === keyspace) {
+                        databaseChild.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+                        databaseChild.children = tables.map((table) => {
+                            console.log('Got table', table);
+                            return new AstraTreeItem(table.name);
+                        })
+
+                    }
+                    return databaseChild;
+                })
+            }
+            return treeItem;
+        })
+        this._onDidChangeTreeData.fire();
+    }
+
     getTreeItem(element: AstraTreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element;
     }

@@ -210,8 +210,17 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('astra-vscode.getTablesInKeyspace', async (database: Database, keyspace: string) => {
 		console.log('Getting tables for keyspace', keyspace);
 		try {
-			const tableResponse = await getTablesInKeyspace(`${database.graphqlUrl}-schema`, keyspace, authTokens[database.id]);
+			const tableResponse = await getTablesInKeyspace(
+				`${database.graphqlUrl}-schema`, keyspace, authTokens[database.id]
+			);
 			console.log('Got tables', tableResponse);
+			const tables: { name: string }[] | undefined = tableResponse.data.keyspace.tables;
+			if (tables !== undefined) {
+				provider.displayTablesInKeyspace(database.id, keyspace, tables);
+			} else {
+				console.log('No tables in keyspace');
+			}
+
 		} catch (error) {
 			console.error('Failed to get tables', error);
 		}
