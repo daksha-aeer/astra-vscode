@@ -19,4 +19,17 @@ type BundleResponse = {
     downloadURL: string
 }
 
-export { Database, BundleResponse }
+type Documents = {
+    [key: string]: any
+}
+
+type TableDocuments = {
+    [key: string]: Documents | undefined
+}
+type DocumentsResponse = {
+    data: {
+        [key: string]: any
+    }
+}
+
+export { Database, BundleResponse, Documents, TableDocuments, DocumentsResponse }

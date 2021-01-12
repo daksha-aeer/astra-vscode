@@ -20,7 +20,7 @@
 		"onCommand:astra-vscode.connectToDatabase",
 		"onCommand:astra-vscode.copyDatabaseAuthToken",
 		"onCommand:astra-vscode.downloadSecureConnectBundle",
-		"astra-vscode.getTablesInKeyspace",
+		"onCommand:astra-vscode.getTablesInKeyspace",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",

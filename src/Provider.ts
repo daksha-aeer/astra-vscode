@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { Database } from './types';
+import { Database, TableDocuments } from './types';
 
 export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
@@ -88,7 +88,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         this._onDidChangeTreeData.fire();
     }
 
-    displayTablesInKeyspace(databaseId: string, keyspace: string, tables: { name: string }[]) {
+    displayTablesInKeyspace(databaseId: string, keyspace: string, tables: { name: string }[], documents: TableDocuments) {
         const dbIndex = this.findDbItemIndex(databaseId);
         const keyspacesGroupIndex = this.findGroupIndex(dbIndex, 'Keyspaces');
 
@@ -96,11 +96,23 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
             if (keyspaceItem.label === keyspace) {
                 if (tables.length > 0) {
                     keyspaceItem.children = tables.map((table, index) => {
-                        console.log('Got table', table);
-                        const tableItem = new AstraTreeItem(table.name, undefined, [
+                        const tableChildren = [
                             new AstraTreeItem('Schema'),
-                            new AstraTreeItem('Documents'),
-                        ]);
+                        ]
+                        if (documents[table.name] !== undefined) {
+                            // TODO special icon for collection table
+
+                            let documentChildren: AstraTreeItem[] = [];
+                            for (const documentId in documents[table.name]) {
+                                documentChildren.push(
+                                    new AstraTreeItem(documentId)
+                                )
+                            }
+                            tableChildren.push(
+                                new AstraTreeItem('Documents', undefined, documentChildren)
+                            )
+                        }
+                        const tableItem = new AstraTreeItem(table.name, undefined, tableChildren);
                         if (index !== 0) {
                             tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
                         }
@@ -125,7 +137,6 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         if (element === undefined) {
             return this.data;
         }
-        console.log('Returning children', element.children);
         return element.children;
     }
 

@@ -4,8 +4,8 @@ import * as fs from 'fs';
 import * as util from 'util';
 import fetch from 'cross-fetch';
 import { Provider, AstraTreeItem } from './Provider';
-import { BundleResponse, Database } from './types';
-import { getSecureBundle, getTablesInKeyspace } from './api';
+import { BundleResponse, Database, Documents, TableDocuments } from './types';
+import { getDocuments, getSecureBundle, getTablesInKeyspace } from './api';
 const readFile = util.promisify(fs.readFile);
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -211,7 +211,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		console.log('Got database token', databaseToken);
 		if (databaseToken === undefined) {
 			console.log('No database token, connecting to DB');
-			vscode.window.showInformationMessage('Connect to database to explore keyspaces');
+			return vscode.window.showInformationMessage('Connect to database to explore keyspaces');
 		}
 		try {
 			const tableResponse = await getTablesInKeyspace(
@@ -220,7 +220,28 @@ export async function activate(context: vscode.ExtensionContext) {
 			console.log('Got tables', tableResponse);
 			const tables: { name: string }[] | undefined = tableResponse.data.keyspace.tables;
 			if (tables !== undefined) {
-				provider.displayTablesInKeyspace(database.id, keyspace, tables);
+				// Get documents
+				let documents: TableDocuments = {};
+				for (const table of tables) {
+					try {
+						console.log('Getting documents for table', table.name);
+						const documentResponse = await getDocuments(
+							database.dataEndpointUrl,
+							keyspace,
+							table.name,
+							databaseToken
+						);
+						console.log('Got documents', documentResponse);
+						documents[table.name] = documentResponse.data;
+					} catch (error) {
+						console.log('No documents for this table');
+					}
+				}
+
+				// pass document
+				console.log('Got all documents', documents);
+				provider.displayTablesInKeyspace(database.id, keyspace, tables, documents);
+
 			} else {
 				console.log('No tables in keyspace');
 			}
@@ -228,7 +249,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		} catch (error) {
 			console.error('Failed to get tables', error);
 		}
-
 	})
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
