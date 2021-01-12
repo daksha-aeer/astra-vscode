@@ -10,7 +10,7 @@ const readFile = util.promisify(fs.readFile);
 
 export async function activate(context: vscode.ExtensionContext) {
 	let devOpsToken: string | null = null;
-	let authTokens: { [key: string]: string } = {};
+	let authTokens: { [key: string]: string | undefined } = {};
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
 
@@ -160,7 +160,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('astra-vscode.copyDatabaseAuthToken', async (id: string) => {
 		console.log('saved tokens', authTokens);
-		await vscode.env.clipboard.writeText(authTokens[id]);
+		await vscode.env.clipboard.writeText(authTokens[id]!);
 		vscode.window.showInformationMessage('Token copied to clipboard');
 	});
 
@@ -208,9 +208,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('astra-vscode.getTablesInKeyspace', async (database: Database, keyspace: string) => {
 		console.log('Getting tables for keyspace', keyspace);
+		const databaseToken = authTokens[database.id];
+		console.log('Got database token', databaseToken);
+		if (databaseToken === undefined) {
+			console.log('No database token, connecting to DB');
+			vscode.window.showInformationMessage('Connect to database to explore keyspaces');
+		}
 		try {
 			const tableResponse = await getTablesInKeyspace(
-				`${database.graphqlUrl}-schema`, keyspace, authTokens[database.id]
+				`${database.graphqlUrl}-schema`, keyspace, authTokens[database.id]!
 			);
 			console.log('Got tables', tableResponse);
 			const tables: { name: string }[] | undefined = tableResponse.data.keyspace.tables;
