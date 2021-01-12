@@ -62,7 +62,13 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     arguments: [treeItem.database],
                 });
                 const keyspaceItems = database.info.keyspaces.map((keyspace) => {
-                    return new AstraTreeItem(keyspace);
+                    const keyspaceItem = new AstraTreeItem(keyspace, {
+                        title: 'Show tables',
+                        command: 'astra-vscode.getTablesInKeyspace',
+                        arguments: [treeItem.database, keyspace],
+                    });
+                    keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                    return keyspaceItem;
                 })
 
                 treeItem.children = [...treeItem.children!, copyTokenItem, launchCqlShellItem, ...keyspaceItems];

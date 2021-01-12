@@ -5,6 +5,7 @@ import * as util from 'util';
 import fetch from 'cross-fetch';
 import { Provider, AstraTreeItem } from './Provider';
 import { BundleResponse, Database } from './types';
+import { getSecureBundle, getTablesInKeyspace } from './api';
 const readFile = util.promisify(fs.readFile);
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -165,23 +166,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('astra-vscode.downloadSecureConnectBundle', async (id: string) => {
 		try {
-			const response = await fetch(`https://api.astra.datastax.com/v2/databases/${id}/secureBundleURL`, {
-				method: 'POST',
-				headers: { Accept: 'application/json', Authorization: `Bearer ${devOpsToken}` },
-			}).then(res => res.json());
-
+			const response = await getSecureBundle(id, devOpsToken!);
 			await vscode.commands.executeCommand('astra-vscode.openUrlInBrowser', response.downloadURL);
 		} catch (error) {
 			vscode.window.showErrorMessage('Failed to get bundle link');
 		}
 	});
-
-	async function getSecureBundle(id: string): Promise<BundleResponse> {
-		return await fetch(`https://api.astra.datastax.com/v2/databases/${id}/secureBundleURL`, {
-			method: 'POST',
-			headers: { Accept: 'application/json', Authorization: `Bearer ${devOpsToken}` },
-		}).then(res => res.json());
-	}
 
 	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (database: Database) => {
 		// Check if bundle exists
@@ -203,7 +193,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		// Download bundle if not present
 		if (!bundlePresent) {
-			const bundleResponse = await getSecureBundle(database.id);
+			const bundleResponse = await getSecureBundle(database.id, devOpsToken!);
 			const secureBundleURL = bundleResponse.downloadURL;
 			const response = await fetch(secureBundleURL);
 			const buffer = Buffer.from(await response.arrayBuffer());
@@ -216,6 +206,17 @@ export async function activate(context: vscode.ExtensionContext) {
 		shell.sendText(`cqlsh -u ${database.info.user} -p ${password} -b "${bundleLocation.path}"`);
 		shell.show();
 	});
+
+	vscode.commands.registerCommand('astra-vscode.getTablesInKeyspace', async (database: Database, keyspace: string) => {
+		console.log('Getting tables for keyspace', keyspace);
+		try {
+			const tableResponse = await getTablesInKeyspace(`${database.graphqlUrl}-schema`, keyspace, authTokens[database.id]);
+			console.log('Got tables', tableResponse);
+		} catch (error) {
+			console.error('Failed to get tables', error);
+		}
+
+	})
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');

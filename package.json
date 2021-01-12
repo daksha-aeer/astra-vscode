@@ -20,6 +20,7 @@
 		"onCommand:astra-vscode.connectToDatabase",
 		"onCommand:astra-vscode.copyDatabaseAuthToken",
 		"onCommand:astra-vscode.downloadSecureConnectBundle",
+		"astra-vscode.getTablesInKeyspace",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -82,6 +83,10 @@
 			{
 				"command": "astra-vscode.downloadSecureConnectBundle",
 				"title": "Download secure auth bundle"
+			},
+			{
+				"command": "astra-vscode.getTablesInKeyspace",
+				"title": "Get tables in keyspace"
 			}
 		],
 		"views": {
