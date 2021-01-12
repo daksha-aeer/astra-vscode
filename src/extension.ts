@@ -174,7 +174,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (database: Database) => {
-		// Check if bundle exists
 		const bundleName = `secure-bundle-${database.info.name}.zip`;
 		const bundleLocation = context.globalStorageUri.with({
 			path: path.posix.join(context.globalStorageUri.path, bundleName)
