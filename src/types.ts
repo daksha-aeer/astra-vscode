@@ -5,8 +5,6 @@ type Database = {
         user: string,
         region: string,
         keyspaces: string[],
-        // keyspace: string,
-        // additionalKeyspaces: [string],
     },
     status: string,
     availableActions: [string],

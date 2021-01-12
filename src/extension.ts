@@ -40,7 +40,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		console.log('Refreshing token');
 		const serviceCredentials = context.globalState.get<string>('serviceCredentials');
 		console.log('Retrieved credentials', serviceCredentials);
-
 		try {
 			const result = await fetch('https://api.astra.datastax.com/v2/authenticateServiceAccount', {
 				method: 'POST',
