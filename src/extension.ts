@@ -6,6 +6,7 @@ import fetch from 'cross-fetch';
 import { Provider, AstraTreeItem } from './Provider';
 import { BundleResponse, Database, Documents, TableDocuments } from './types';
 import { getDocuments, getSecureBundle, getTablesInKeyspace } from './api';
+import DocumentProvider from './DocumentProvider';
 const readFile = util.promisify(fs.readFile);
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -19,6 +20,17 @@ export async function activate(context: vscode.ExtensionContext) {
 		'databases-view',
 		provider
 	);
+
+	// To view virtual documents
+	const documentProvider = new DocumentProvider();
+	const documentsScheme = 'documents-scheme';
+	vscode.workspace.registerTextDocumentContentProvider(documentsScheme, documentProvider);
+
+	vscode.commands.registerCommand('astra-vscode.viewDocument', async () => {
+		const uri = vscode.Uri.parse(documentsScheme + ':' + 'ABCD.json');
+		const doc = await vscode.workspace.openTextDocument(uri);
+		await vscode.window.showTextDocument(doc);
+	});
 
 	vscode.commands.registerCommand('astra-vscode.helloWorld', () => {
 		vscode.window.showInformationMessage('Hello World from Astra VSCode!');

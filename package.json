@@ -21,6 +21,7 @@
 		"onCommand:astra-vscode.copyDatabaseAuthToken",
 		"onCommand:astra-vscode.downloadSecureConnectBundle",
 		"onCommand:astra-vscode.getTablesInKeyspace",
+		"onCommand:astra-vscode.viewDocument",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -87,6 +88,10 @@
 			{
 				"command": "astra-vscode.getTablesInKeyspace",
 				"title": "Get tables in keyspace"
+			},
+			{
+				"command": "astra-vscode.viewDocument",
+				"title": "View document"
 			}
 		],
 		"views": {
