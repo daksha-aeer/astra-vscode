@@ -95,7 +95,6 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         }
 
         dbItem.contextValue = 'database-connected';
-        dbItem.iconPath = undefined;
         this._onDidChangeTreeData.fire();
     }
 
@@ -105,15 +104,22 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
     ) {
         if (tables.length > 0) {
             keyspaceItem.children = tables.map((table, index) => {
+                const tableName = table.name;
                 const tableChildren = [
                     new AstraTreeItem('Schema'),
                 ]
-                if (documentsPerTable[table.name] !== undefined) {
+                const tableItem = new AstraTreeItem(tableName, undefined, tableChildren);
+                const tableDocuments = documentsPerTable[tableName];
+                if (tableDocuments) {
                     // TODO special icon for collection table
+                    tableItem.iconPath = {
+                        light: path.join(__filename, '..', '..', 'resources', 'light', 'folder-closed.svg'),
+                        dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder-closed.svg'),
+                    }
 
                     let documentChildren: AstraTreeItem[] = [];
-                    for (const documentId in documentsPerTable[table.name]) {
-                        const documentBody = documentsPerTable[table.name]![documentId].data;
+                    for (const documentId in tableDocuments) {
+                        const documentBody = tableDocuments[documentId].data;
                         documentChildren.push(
                             new AstraTreeItem(documentId, {
                                 title: 'View document',
@@ -124,9 +130,13 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     }
                     const documentsGroupItem = new AstraTreeItem('Documents');
                     documentsGroupItem.contextValue = 'documents';
+                    documentsGroupItem.iconPath = {
+                        light: path.join(__filename, '..', '..', 'resources', 'light', 'documents.svg'),
+                        dark: path.join(__filename, '..', '..', 'resources', 'dark', 'documents.svg'),
+                    }
                     documentsGroupItem.database = keyspaceItem.database;
                     documentsGroupItem.keyspace = keyspaceItem.keyspace;
-                    documentsGroupItem.tableName = table.name;
+                    documentsGroupItem.tableName = tableName;
                     if (pageState) {
                         documentChildren.push(
                             new AstraTreeItem('Load more...', {
@@ -137,11 +147,11 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                         )
                     }
                     documentsGroupItem.children = documentChildren;
-                    documentsGroupItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+                    documentsGroupItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
                     console.log('Table documents group item', documentsGroupItem);
                     tableChildren.push(documentsGroupItem);
                 }
-                const tableItem = new AstraTreeItem(table.name, undefined, tableChildren);
+
                 if (index !== 0) {
                     tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
                 }
