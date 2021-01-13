@@ -26,10 +26,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	const documentsScheme = 'documents-scheme';
 	vscode.workspace.registerTextDocumentContentProvider(documentsScheme, documentProvider);
 
-	vscode.commands.registerCommand('astra-vscode.viewDocument', async () => {
-		const uri = vscode.Uri.parse(documentsScheme + ':' + 'ABCD.json');
+	vscode.commands.registerCommand('astra-vscode.viewDocument', async (documentName: string, documentBody: any) => {
+		const uri = vscode.Uri.parse(`${documentsScheme}:${documentName}.json?body=${documentBody}`);
 		const doc = await vscode.workspace.openTextDocument(uri);
-		await vscode.window.showTextDocument(doc);
+		await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Two });
 	});
 
 	vscode.commands.registerCommand('astra-vscode.helloWorld', () => {
