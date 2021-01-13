@@ -213,7 +213,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		shell.show();
 	});
 
-	vscode.commands.registerCommand('astra-vscode.getTablesInKeyspace', async (keyspaceItem: AstraTreeItem) => {
+	vscode.commands.registerCommand('astra-vscode.getTablesAndDocsInKeyspace', async (keyspaceItem: AstraTreeItem) => {
 		const database = keyspaceItem.database!;
 		const keyspace = keyspaceItem.keyspace!;
 		console.log('Getting tables for keyspace', keyspace);

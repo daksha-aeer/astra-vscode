@@ -51,12 +51,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 const keyspaceItem = new AstraTreeItem(keyspace);
                 keyspaceItem.database = database;
                 keyspaceItem.keyspace = keyspace;
-                keyspaceItem.command = {
-                    title: 'Show tables',
-                    command: 'astra-vscode.getTablesInKeyspace',
-                    arguments: [keyspaceItem],
-                }
-                keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                keyspaceItem.contextValue = 'keyspace';
                 return keyspaceItem;
             })
 
@@ -80,14 +75,18 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                         command: 'astra-vscode.copyDatabaseAuthToken',
                         arguments: [database.id],
                     });
-                }
-                    break;
+                } break;
                 case 'Manage': {
                     newChild = new AstraTreeItem('Launch CQL Shell', {
                         title: 'Launch CQL Shell',
                         command: 'astra-vscode.openCqlsh',
                         arguments: [database],
                     })
+                } break;
+                case 'Keyspaces': {
+                    for (const keyspaceItem of databaseChildItem.children!) {
+                        keyspaceItem.contextValue = 'connectable-keyspace'
+                    }
                 }
             }
             if (newChild) {
@@ -149,6 +148,8 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
                 return tableItem;
             })
+            keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+            keyspaceItem.contextValue = 'connected-keyspace';
         } else {
             keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
         }

@@ -20,7 +20,7 @@
 		"onCommand:astra-vscode.connectToDatabase",
 		"onCommand:astra-vscode.copyDatabaseAuthToken",
 		"onCommand:astra-vscode.downloadSecureConnectBundle",
-		"onCommand:astra-vscode.getTablesInKeyspace",
+		"onCommand:astra-vscode.getTablesAndDocsInKeyspace",
 		"onCommand:astra-vscode.viewDocument",
 		"onCommand:astra-vscode.paginateDocuments",
 		"onCommand:astra-vscode.searchDocuments",
@@ -88,8 +88,12 @@
 				"title": "Download secure auth bundle"
 			},
 			{
-				"command": "astra-vscode.getTablesInKeyspace",
-				"title": "Get tables in keyspace"
+				"command": "astra-vscode.getTablesAndDocsInKeyspace",
+				"title": "Get tables in keyspace",
+				"icon": {
+					"light": "resources/light/plug.svg",
+					"dark": "resources/dark/plug.svg"
+				}
 			},
 			{
 				"command": "astra-vscode.viewDocument",
@@ -141,6 +145,11 @@
 				{
 					"command": "astra-vscode.connectToDatabase",
 					"when": "view == databases-view && viewItem == database",
+					"group": "inline"
+				},
+				{
+					"command": "astra-vscode.getTablesAndDocsInKeyspace",
+					"when": "view == databases-view && viewItem == connectable-keyspace",
 					"group": "inline"
 				},
 				{
