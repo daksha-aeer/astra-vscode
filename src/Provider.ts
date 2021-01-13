@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { Database, TableDocuments } from './types';
+import { Database, Documents, DocumentsResponse, TableDocuments } from './types';
 
 export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
@@ -116,15 +116,20 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                                     })
                                 )
                             }
-                            if (pageState) {
+                            const tableDocumentsGroupItem = new AstraTreeItem('Documents');
+                            if (pageState !== undefined) {
                                 documentChildren.push(
-                                    new AstraTreeItem('Load more...')
+                                    new AstraTreeItem('Load more...', {
+                                        title: 'Load more',
+                                        command: 'astra-vscode.paginateDocuments',
+                                        arguments: [this.data![dbIndex].database, keyspace, table.name, pageState, tableDocumentsGroupItem],
+                                    })
                                 )
                             }
-
-                            tableChildren.push(
-                                new AstraTreeItem('Documents', undefined, documentChildren)
-                            )
+                            tableDocumentsGroupItem.children = documentChildren;
+                            tableDocumentsGroupItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+                            console.log('Table documents group item', tableDocumentsGroupItem);
+                            tableChildren.push(tableDocumentsGroupItem);
                         }
                         const tableItem = new AstraTreeItem(table.name, undefined, tableChildren);
                         if (index !== 0) {
@@ -140,6 +145,33 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
             return keyspaceItem;
         })
 
+        this._onDidChangeTreeData.fire();
+    }
+
+    displayPaginatedDocuments(
+        documentsGroupItem: AstraTreeItem,
+        documentsResponse: DocumentsResponse
+    ) {
+        const loadMoreItem = documentsGroupItem.children!.pop()!;
+        const documents = documentsResponse.data;
+        const pageState = documentsResponse.pageState;
+
+        for (const documentId in documents) {
+            documentsGroupItem.children?.push(
+                new AstraTreeItem(documentId, {
+                    title: 'View document',
+                    command: 'astra-vscode.viewDocument',
+                    arguments: [documentId, documents[documentId].data],
+                })
+            )
+        }
+        if (pageState !== undefined) {
+            const loadMoreCommand = loadMoreItem!.command!;
+            loadMoreCommand.arguments![3] = pageState;
+            documentsGroupItem.children?.push(
+                loadMoreItem
+            )
+        }
         this._onDidChangeTreeData.fire();
     }
 

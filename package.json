@@ -22,6 +22,7 @@
 		"onCommand:astra-vscode.downloadSecureConnectBundle",
 		"onCommand:astra-vscode.getTablesInKeyspace",
 		"onCommand:astra-vscode.viewDocument",
+		"onCommand:astra-vscode.paginateDocuments",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -92,6 +93,10 @@
 			{
 				"command": "astra-vscode.viewDocument",
 				"title": "View document"
+			},
+			{
+				"command": "astra-vscode.paginateDocuments",
+				"title": "Paginate documents"
 			}
 		],
 		"views": {

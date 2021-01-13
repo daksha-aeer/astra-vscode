@@ -27,9 +27,16 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.registerTextDocumentContentProvider(documentsScheme, documentProvider);
 
 	vscode.commands.registerCommand('astra-vscode.viewDocument', async (documentName: string, documentBody: any) => {
+		console.log('Opening document', documentName);
+		console.log('Document body', documentBody);
 		const uri = vscode.Uri.parse(`${documentsScheme}:${documentName}.json?body=${documentBody}`);
-		const doc = await vscode.workspace.openTextDocument(uri);
-		await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Two });
+		try {
+			const doc = await vscode.workspace.openTextDocument(uri);
+			await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Two });
+		} catch (error) {
+			console.error('Failed to open document', error);
+		}
+
 	});
 
 	vscode.commands.registerCommand('astra-vscode.helloWorld', () => {
@@ -267,6 +274,30 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	})
 
+	vscode.commands.registerCommand('astra-vscode.paginateDocuments', async (
+		database: Database, keyspace: string, tableName: string, pageState: string, documentsGroupItem: AstraTreeItem
+	) => {
+
+		console.log('Getting documents for table', tableName);
+		const databaseToken = authTokens[database.id];
+		console.log('Got database token', databaseToken);
+		if (databaseToken === undefined) {
+			console.log('No database token, connecting to DB');
+			return vscode.window.showInformationMessage('Connect to database to explore keyspaces');
+		}
+		const documentResponse = await getDocuments(
+			database.dataEndpointUrl,
+			keyspace,
+			tableName,
+			databaseToken,
+			pageState
+		);
+		console.log('Got documents', documentResponse);
+		const newPageState = documentResponse.pageState;
+		console.log('Got new page State', newPageState);
+
+		provider.displayPaginatedDocuments(documentsGroupItem, documentResponse);
+	})
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 }

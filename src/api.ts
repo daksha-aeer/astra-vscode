@@ -27,11 +27,16 @@ async function getSecureBundle(id: string, devOpsToken: string): Promise<BundleR
     }).then(res => res.json());
 }
 
-async function getDocuments(endpoint: string, keyspace: string, table: string, authToken: string): Promise<DocumentsResponse> {
-    const url = `${endpoint}/v2/namespaces/${keyspace}/collections/${table}?page-size=5`;
+async function getDocuments(
+    endpoint: string, keyspace: string, table: string, authToken: string, pageState?: string
+): Promise<DocumentsResponse> {
+    let url = `${endpoint}/v2/namespaces/${keyspace}/collections/${table}?page-size=5`;
+    if (pageState !== undefined) {
+        url += `&page-state=${encodeURIComponent(pageState)}`
+    }
     console.log('Get documents url', url);
     console.log('auth token', authToken);
-    return await fetch(`${endpoint}/v2/namespaces/${keyspace}/collections/${table}?page-size=5`, {
+    return await fetch(url, {
         headers: { 'X-Cassandra-Token': authToken },
     }).then(res => res.json());
 }
