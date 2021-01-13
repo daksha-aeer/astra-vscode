@@ -42,22 +42,29 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 }),
             ]
 
+            const databaseItem = new AstraTreeItem(database.info.name, undefined, [
+                new AstraTreeItem('API', undefined, apiChildren),
+                new AstraTreeItem('Manage', undefined, manageDatabaseChildren),
+            ], 'database', database)
+
             const keyspaceItems = database.info.keyspaces.map((keyspace) => {
-                const keyspaceItem = new AstraTreeItem(keyspace, {
+                const keyspaceItem = new AstraTreeItem(keyspace);
+                keyspaceItem.database = database;
+                keyspaceItem.keyspace = keyspace;
+                keyspaceItem.command = {
                     title: 'Show tables',
                     command: 'astra-vscode.getTablesInKeyspace',
-                    arguments: [database, keyspace],
-                });
+                    arguments: [keyspaceItem],
+                }
                 keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
                 return keyspaceItem;
             })
 
-            return new AstraTreeItem(database.info.name, undefined, [
-                new AstraTreeItem('API', undefined, apiChildren),
-                new AstraTreeItem('Manage', undefined, manageDatabaseChildren),
-                new AstraTreeItem('Keyspaces', undefined, keyspaceItems),
+            databaseItem.children!.push(
+                new AstraTreeItem('Keyspaces', undefined, keyspaceItems)
+            )
 
-            ], 'database', database)
+            return databaseItem;
         });
         this._onDidChangeTreeData.fire();
     }
@@ -93,66 +100,58 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         this._onDidChangeTreeData.fire();
     }
 
-    displayTablesInKeyspace(
-        databaseId: string, keyspace: string, tables: { name: string }[],
-        documents: TableDocuments, pageState?: string
+    displayTablesAndDocsForKeyspace(
+        keyspaceItem: AstraTreeItem, tables: { name: string }[],
+        documentsPerTable: TableDocuments, pageState?: string
     ) {
-        const dbIndex = this.findDbItemIndex(databaseId);
-        const keyspacesGroupIndex = this.findGroupIndex(dbIndex, 'Keyspaces');
+        if (tables.length > 0) {
+            keyspaceItem.children = tables.map((table, index) => {
+                const tableChildren = [
+                    new AstraTreeItem('Schema'),
+                ]
+                if (documentsPerTable[table.name] !== undefined) {
+                    // TODO special icon for collection table
 
-        this.data![dbIndex].children![keyspacesGroupIndex].children?.map((keyspaceItem) => {
-            if (keyspaceItem.label === keyspace) {
-                if (tables.length > 0) {
-                    keyspaceItem.children = tables.map((table, index) => {
-                        const tableChildren = [
-                            new AstraTreeItem('Schema'),
-                        ]
-                        if (documents[table.name] !== undefined) {
-                            // TODO special icon for collection table
-
-                            let documentChildren: AstraTreeItem[] = [];
-                            for (const documentId in documents[table.name]) {
-                                const documentBody = documents[table.name]![documentId].data;
-                                documentChildren.push(
-                                    new AstraTreeItem(documentId, {
-                                        title: 'View document',
-                                        command: 'astra-vscode.viewDocument',
-                                        arguments: [documentId, documentBody],
-                                    })
-                                )
-                            }
-                            const documentsGroupItem = new AstraTreeItem('Documents');
-                            documentsGroupItem.contextValue = 'documents';
-                            documentsGroupItem.database = this.data![dbIndex].database;
-                            documentsGroupItem.keyspace = keyspace;
-                            documentsGroupItem.tableName = table.name;
-                            if (pageState !== undefined) {
-                                documentChildren.push(
-                                    new AstraTreeItem('Load more...', {
-                                        title: 'Load more',
-                                        command: 'astra-vscode.paginateDocuments',
-                                        arguments: [this.data![dbIndex].database, keyspace, table.name, pageState, documentsGroupItem],
-                                    })
-                                )
-                            }
-                            documentsGroupItem.children = documentChildren;
-                            documentsGroupItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
-                            console.log('Table documents group item', documentsGroupItem);
-                            tableChildren.push(documentsGroupItem);
-                        }
-                        const tableItem = new AstraTreeItem(table.name, undefined, tableChildren);
-                        if (index !== 0) {
-                            tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-                        }
-
-                        return tableItem;
-                    })
-                } else {
-                    keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
+                    let documentChildren: AstraTreeItem[] = [];
+                    for (const documentId in documentsPerTable[table.name]) {
+                        const documentBody = documentsPerTable[table.name]![documentId].data;
+                        documentChildren.push(
+                            new AstraTreeItem(documentId, {
+                                title: 'View document',
+                                command: 'astra-vscode.viewDocument',
+                                arguments: [documentId, documentBody],
+                            })
+                        )
+                    }
+                    const documentsGroupItem = new AstraTreeItem('Documents');
+                    documentsGroupItem.contextValue = 'documents';
+                    documentsGroupItem.database = keyspaceItem.database;
+                    documentsGroupItem.keyspace = keyspaceItem.keyspace;
+                    documentsGroupItem.tableName = table.name;
+                    if (pageState) {
+                        documentChildren.push(
+                            new AstraTreeItem('Load more...', {
+                                title: 'Load more',
+                                command: 'astra-vscode.paginateDocuments',
+                                arguments: [documentsGroupItem, pageState],
+                            })
+                        )
+                    }
+                    documentsGroupItem.children = documentChildren;
+                    documentsGroupItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+                    console.log('Table documents group item', documentsGroupItem);
+                    tableChildren.push(documentsGroupItem);
                 }
-            }
-            return keyspaceItem;
-        })
+                const tableItem = new AstraTreeItem(table.name, undefined, tableChildren);
+                if (index !== 0) {
+                    tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                }
+
+                return tableItem;
+            })
+        } else {
+            keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
+        }
 
         this._onDidChangeTreeData.fire();
     }
@@ -161,7 +160,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         documentsGroupItem: AstraTreeItem,
         documentsResponse: DocumentsResponse
     ) {
-        const loadMoreItem = documentsGroupItem.children!.pop()!;
+        const paginateItem = documentsGroupItem.children!.pop()!; // remove
         const documents = documentsResponse.data;
         const pageState = documentsResponse.pageState;
 
@@ -174,12 +173,10 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 })
             )
         }
-        if (pageState !== undefined) {
-            const loadMoreCommand = loadMoreItem!.command!;
+        if (pageState) { // add again if documents remain
+            const loadMoreCommand = paginateItem!.command!;
             loadMoreCommand.arguments![3] = pageState;
-            documentsGroupItem.children?.push(
-                loadMoreItem
-            )
+            documentsGroupItem.children?.push(paginateItem);
         }
         this._onDidChangeTreeData.fire();
     }
@@ -193,19 +190,6 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
             return this.data;
         }
         return element.children;
-    }
-
-    // Utils
-    findDbItemIndex(databaseId: string) {
-        return this.data!.findIndex((dbItem) => {
-            return dbItem.database?.id === databaseId;
-        })
-    }
-
-    findGroupIndex(databaseIndex: number, groupName: string) {
-        return this.data![databaseIndex].children!.findIndex((dbActionItem) => {
-            return dbActionItem.label === groupName;
-        });
     }
 }
 

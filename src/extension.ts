@@ -213,7 +213,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		shell.show();
 	});
 
-	vscode.commands.registerCommand('astra-vscode.getTablesInKeyspace', async (database: Database, keyspace: string) => {
+	vscode.commands.registerCommand('astra-vscode.getTablesInKeyspace', async (keyspaceItem: AstraTreeItem) => {
+		const database = keyspaceItem.database!;
+		const keyspace = keyspaceItem.keyspace!;
 		console.log('Getting tables for keyspace', keyspace);
 		const databaseToken = authTokens[database.id];
 		console.log('Got database token', databaseToken);
@@ -229,9 +231,9 @@ export async function activate(context: vscode.ExtensionContext) {
 			const tables: { name: string }[] | undefined = tableResponse.data.keyspace.tables;
 
 			let pageState: string | undefined = undefined;
-			if (tables !== undefined) {
+			if (tables) {
 				// Get documents
-				let documents: TableDocuments = {};
+				let documentsPerTable: TableDocuments = {};
 				for (const table of tables) {
 					try {
 						console.log('Getting documents for table', table.name);
@@ -244,15 +246,15 @@ export async function activate(context: vscode.ExtensionContext) {
 						console.log('Got documents', documentResponse);
 						pageState = documentResponse.pageState;
 						console.log('Got pageState', pageState);
-						documents[table.name] = documentResponse?.data;
+						documentsPerTable[table.name] = documentResponse?.data;
 					} catch (error) {
 						console.log('No documents for this table');
 					}
 				}
 
 				// pass document
-				console.log('Got all documents', documents);
-				provider.displayTablesInKeyspace(database.id, keyspace, tables, documents, pageState);
+				console.log('Got all documents', documentsPerTable);
+				provider.displayTablesAndDocsForKeyspace(keyspaceItem, tables, documentsPerTable, pageState);
 
 			} else {
 				console.log('No tables in keyspace');
@@ -264,9 +266,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	})
 
 	vscode.commands.registerCommand('astra-vscode.paginateDocuments', async (
-		database: Database, keyspace: string, tableName: string, pageState: string, documentsGroupItem: AstraTreeItem
+		documentsGroupItem: AstraTreeItem, pageState: string
 	) => {
-
+		const database = documentsGroupItem.database!;
+		const keyspace = documentsGroupItem.keyspace!;
+		const tableName = documentsGroupItem.tableName!;
 		console.log('Getting documents for table', tableName);
 		const databaseToken = authTokens[database.id];
 		console.log('Got database token', databaseToken);
@@ -274,18 +278,23 @@ export async function activate(context: vscode.ExtensionContext) {
 			console.log('No database token, connecting to DB');
 			return vscode.window.showInformationMessage('Connect to database to explore keyspaces');
 		}
-		const documentResponse = await getDocuments(
-			database.dataEndpointUrl,
-			keyspace,
-			tableName,
-			databaseToken,
-			pageState
-		);
-		console.log('Got documents', documentResponse);
-		const newPageState = documentResponse.pageState;
-		console.log('Got new page State', newPageState);
+		try {
+			const documentResponse = await getDocuments(
+				database.dataEndpointUrl,
+				keyspace,
+				tableName,
+				databaseToken,
+				pageState
+			);
+			console.log('Got documents', documentResponse);
+			const newPageState = documentResponse.pageState;
+			console.log('Got new page State', newPageState);
 
-		provider.displayPaginatedDocuments(documentsGroupItem, documentResponse);
+			provider.displayPaginatedDocuments(documentsGroupItem, documentResponse);
+		} catch (error) {
+			console.error('Failed to paginate', error);
+		}
+
 	})
 
 	vscode.commands.registerCommand('astra-vscode.searchDocuments', async (documentsGroupItem: AstraTreeItem) => {

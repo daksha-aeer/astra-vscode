@@ -43,7 +43,7 @@ async function getDocuments(
     let url = new URL(`${endpoint}/v2/namespaces/${keyspace}/collections/${table}`);
 
     if (pageState !== undefined) {
-        url.searchParams.append('page-state', encodeURIComponent(pageState));
+        url.searchParams.append('page-state', pageState); // performs URL encoding
     }
     if (searchQuery !== undefined) {
         url.searchParams.append('where', searchQuery);
@@ -52,8 +52,6 @@ async function getDocuments(
         // Only fetch 5 documents, if not searching
         url.searchParams.append('page-size', '5');
     }
-    console.log('Get documents url', url);
-    console.log('auth token', authToken);
     return await fetch(url.toString(), {
         headers: { 'X-Cassandra-Token': authToken },
     }).then(res => res.json());
