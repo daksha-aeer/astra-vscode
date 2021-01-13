@@ -88,7 +88,10 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         this._onDidChangeTreeData.fire();
     }
 
-    displayTablesInKeyspace(databaseId: string, keyspace: string, tables: { name: string }[], documents: TableDocuments) {
+    displayTablesInKeyspace(
+        databaseId: string, keyspace: string, tables: { name: string }[],
+        documents: TableDocuments, pageState?: string
+    ) {
         const dbIndex = this.findDbItemIndex(databaseId);
         const keyspacesGroupIndex = this.findGroupIndex(dbIndex, 'Keyspaces');
 
@@ -113,6 +116,12 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                                     })
                                 )
                             }
+                            if (pageState) {
+                                documentChildren.push(
+                                    new AstraTreeItem('Load more...')
+                                )
+                            }
+
                             tableChildren.push(
                                 new AstraTreeItem('Documents', undefined, documentChildren)
                             )

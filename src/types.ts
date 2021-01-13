@@ -27,6 +27,7 @@ type TableDocuments = {
     [key: string]: Documents | undefined
 }
 type DocumentsResponse = {
+    pageState?: string,
     data: {
         [key: string]: any
     }

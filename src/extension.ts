@@ -231,6 +231,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			);
 			console.log('Got tables', tableResponse);
 			const tables: { name: string }[] | undefined = tableResponse.data.keyspace.tables;
+
+			let pageState: string | undefined = undefined;
 			if (tables !== undefined) {
 				// Get documents
 				let documents: TableDocuments = {};
@@ -244,7 +246,9 @@ export async function activate(context: vscode.ExtensionContext) {
 							databaseToken
 						);
 						console.log('Got documents', documentResponse);
-						documents[table.name] = documentResponse.data;
+						pageState = documentResponse.pageState;
+						console.log('Got pageState', pageState);
+						documents[table.name] = documentResponse?.data;
 					} catch (error) {
 						console.log('No documents for this table');
 					}
@@ -252,7 +256,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				// pass document
 				console.log('Got all documents', documents);
-				provider.displayTablesInKeyspace(database.id, keyspace, tables, documents);
+				provider.displayTablesInKeyspace(database.id, keyspace, tables, documents, pageState);
 
 			} else {
 				console.log('No tables in keyspace');

@@ -1,5 +1,5 @@
 import fetch from 'cross-fetch';
-import { BundleResponse, TableDocuments } from "./types";
+import { BundleResponse, DocumentsResponse, TableDocuments } from "./types";
 
 async function getTablesInKeyspace(endpoint: string, keyspace: string, authToken: string) {
     const query = `query getTablesInKeyspace ($keyspace: String!) {
@@ -27,7 +27,7 @@ async function getSecureBundle(id: string, devOpsToken: string): Promise<BundleR
     }).then(res => res.json());
 }
 
-async function getDocuments(endpoint: string, keyspace: string, table: string, authToken: string): Promise<TableDocuments> {
+async function getDocuments(endpoint: string, keyspace: string, table: string, authToken: string): Promise<DocumentsResponse> {
     const url = `${endpoint}/v2/namespaces/${keyspace}/collections/${table}?page-size=5`;
     console.log('Get documents url', url);
     console.log('auth token', authToken);
