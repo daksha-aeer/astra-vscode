@@ -116,20 +116,24 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                                     })
                                 )
                             }
-                            const tableDocumentsGroupItem = new AstraTreeItem('Documents');
+                            const documentsGroupItem = new AstraTreeItem('Documents');
+                            documentsGroupItem.contextValue = 'documents';
+                            documentsGroupItem.database = this.data![dbIndex].database;
+                            documentsGroupItem.keyspace = keyspace;
+                            documentsGroupItem.tableName = table.name;
                             if (pageState !== undefined) {
                                 documentChildren.push(
                                     new AstraTreeItem('Load more...', {
                                         title: 'Load more',
                                         command: 'astra-vscode.paginateDocuments',
-                                        arguments: [this.data![dbIndex].database, keyspace, table.name, pageState, tableDocumentsGroupItem],
+                                        arguments: [this.data![dbIndex].database, keyspace, table.name, pageState, documentsGroupItem],
                                     })
                                 )
                             }
-                            tableDocumentsGroupItem.children = documentChildren;
-                            tableDocumentsGroupItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
-                            console.log('Table documents group item', tableDocumentsGroupItem);
-                            tableChildren.push(tableDocumentsGroupItem);
+                            documentsGroupItem.children = documentChildren;
+                            documentsGroupItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+                            console.log('Table documents group item', documentsGroupItem);
+                            tableChildren.push(documentsGroupItem);
                         }
                         const tableItem = new AstraTreeItem(table.name, undefined, tableChildren);
                         if (index !== 0) {
@@ -203,6 +207,8 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 export class AstraTreeItem extends vscode.TreeItem {
     children?: AstraTreeItem[];
     database?: Database;
+    keyspace?: string;
+    tableName?: string;
 
     constructor(label: string, command?: vscode.Command, children?: AstraTreeItem[], contextValue?: string, database?: Database) {
         super(label,

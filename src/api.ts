@@ -1,5 +1,5 @@
 import fetch from 'cross-fetch';
-import { BundleResponse, DocumentsResponse, TableDocuments } from "./types";
+import { BundleResponse, DocumentsResponse } from "./types";
 
 async function getTablesInKeyspace(endpoint: string, keyspace: string, authToken: string) {
     const query = `query getTablesInKeyspace ($keyspace: String!) {
@@ -28,15 +28,23 @@ async function getSecureBundle(id: string, devOpsToken: string): Promise<BundleR
 }
 
 async function getDocuments(
-    endpoint: string, keyspace: string, table: string, authToken: string, pageState?: string
+    endpoint: string, keyspace: string, table: string, authToken: string, pageState?: string, searchQuery?: string
 ): Promise<DocumentsResponse> {
-    let url = `${endpoint}/v2/namespaces/${keyspace}/collections/${table}?page-size=5`;
+    let url = new URL(`${endpoint}/v2/namespaces/${keyspace}/collections/${table}`);
+
     if (pageState !== undefined) {
-        url += `&page-state=${encodeURIComponent(pageState)}`
+        url.searchParams.append('page-state', encodeURIComponent(pageState));
+    }
+    if (searchQuery !== undefined) {
+        url.searchParams.append('where', searchQuery);
+        url.searchParams.append('page-size', '20');
+    } else {
+        // Only fetch 5 documents, if not searching
+        url.searchParams.append('page-size', '5');
     }
     console.log('Get documents url', url);
     console.log('auth token', authToken);
-    return await fetch(url, {
+    return await fetch(url.toString(), {
         headers: { 'X-Cassandra-Token': authToken },
     }).then(res => res.json());
 }

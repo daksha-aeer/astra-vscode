@@ -298,6 +298,32 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		provider.displayPaginatedDocuments(documentsGroupItem, documentResponse);
 	})
+
+	vscode.commands.registerCommand('astra-vscode.searchDocuments', async (documentsGroupItem: AstraTreeItem) => {
+		console.log('Searching documents for', documentsGroupItem);
+		const database = documentsGroupItem.database!;
+		const databaseToken = authTokens[database.id]!;
+
+		const query = await vscode.window.showInputBox({
+			prompt: 'Enter search query with operations $eq, $ne, $in, $nin, $gt, $lt, $gte, $lte or $exists.',
+			placeHolder: JSON.stringify({ "car": { "$eq": "ferrari" } }),
+		})
+
+		const documentResponse = await getDocuments(
+			database.dataEndpointUrl,
+			documentsGroupItem.keyspace!,
+			documentsGroupItem.tableName!,
+			databaseToken,
+			undefined,
+			query
+		);
+		console.log('Got search response', documentResponse.data);
+		await vscode.commands.executeCommand(
+			'astra-vscode.viewDocument',
+			'search-results',
+			JSON.stringify(documentResponse.data)
+		);
+	})
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 }

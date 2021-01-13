@@ -23,6 +23,7 @@
 		"onCommand:astra-vscode.getTablesInKeyspace",
 		"onCommand:astra-vscode.viewDocument",
 		"onCommand:astra-vscode.paginateDocuments",
+		"onCommand:astra-vscode.searchDocuments",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -97,6 +98,14 @@
 			{
 				"command": "astra-vscode.paginateDocuments",
 				"title": "Paginate documents"
+			},
+			{
+				"command": "astra-vscode.searchDocuments",
+				"title": "Search documents",
+				"icon": {
+					"light": "resources/light/search.svg",
+					"dark": "resources/dark/search.svg"
+				}
 			}
 		],
 		"views": {
@@ -132,6 +141,11 @@
 				{
 					"command": "astra-vscode.connectToDatabase",
 					"when": "view == databases-view && viewItem == database",
+					"group": "inline"
+				},
+				{
+					"command": "astra-vscode.searchDocuments",
+					"when": "view == databases-view && viewItem == documents",
 					"group": "inline"
 				}
 			]
