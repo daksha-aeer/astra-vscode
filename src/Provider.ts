@@ -62,29 +62,34 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         this._onDidChangeTreeData.fire();
     }
 
-    displayConnectedDatabaseOptions(connectedDbId: string) {
-        const dbIndex = this.findDbItemIndex(connectedDbId);
-        const apiGroupIndex = this.findGroupIndex(dbIndex, 'API');
-        const manageGroupIndex = this.findGroupIndex(dbIndex, 'Manage');
+    displayConnectedDatabaseOptions(dbItem: AstraTreeItem) {
+        const database = dbItem.database!;
+        for (const databaseChildItem of dbItem.children!) {
+            let newChild: AstraTreeItem | undefined = undefined;
+            switch (databaseChildItem.label) {
+                case 'API': {
+                    newChild = new AstraTreeItem('Copy auth token', {
+                        title: 'Copy auth token',
+                        command: 'astra-vscode.copyDatabaseAuthToken',
+                        arguments: [database.id],
+                    });
+                }
+                    break;
+                case 'Manage': {
+                    newChild = new AstraTreeItem('Launch CQL Shell', {
+                        title: 'Launch CQL Shell',
+                        command: 'astra-vscode.openCqlsh',
+                        arguments: [database],
+                    })
+                }
+            }
+            if (newChild) {
+                databaseChildItem.children!.push(newChild)
+            }
+        }
 
-        this.data![dbIndex].children![apiGroupIndex].children!.push(
-            new AstraTreeItem('Copy auth token', {
-                title: 'Copy auth token',
-                command: 'astra-vscode.copyDatabaseAuthToken',
-                arguments: [connectedDbId],
-            })
-        )
-
-        this.data![dbIndex].children![manageGroupIndex].children!.push(
-            new AstraTreeItem('Launch CQL Shell', {
-                title: 'Launch CQL Shell',
-                command: 'astra-vscode.openCqlsh',
-                arguments: [this.data![dbIndex].database],
-            })
-        )
-
-        this.data![dbIndex].contextValue = 'database-connected';
-        this.data![dbIndex].iconPath = undefined;
+        dbItem.contextValue = 'database-connected';
+        dbItem.iconPath = undefined;
         this._onDidChangeTreeData.fire();
     }
 

@@ -5,7 +5,7 @@ import * as util from 'util';
 import fetch from 'cross-fetch';
 import { Provider, AstraTreeItem } from './Provider';
 import { BundleResponse, Database, Documents, TableDocuments } from './types';
-import { getDocuments, getSecureBundle, getTablesInKeyspace } from './api';
+import { getDatabaseAuthToken, getDocuments, getSecureBundle, getTablesInKeyspace } from './api';
 import DocumentProvider from './DocumentProvider';
 const readFile = util.promisify(fs.readFile);
 
@@ -130,10 +130,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('astra-vscode.connectToDatabase', async (databaseTreeItem: AstraTreeItem) => {
 		console.log('got parm', databaseTreeItem);
-		const database = databaseTreeItem.database!!;
+		const database = databaseTreeItem.database!;
 		console.log('got database', database);
 		const id = database.id;
-		console.log('got id', id);
 		try {
 			let password = context.globalState.get<string>(`passwords.${id}`);
 			let savePassword = false;
@@ -146,19 +145,9 @@ export async function activate(context: vscode.ExtensionContext) {
 				})
 				console.log('input password', password);
 			}
+			const authTokenResponse = await getDatabaseAuthToken(database, password!);
 
-			const response = await fetch(`https://${database.id}-${database.info.region}.apps.astra.datastax.com/api/rest/v1/auth`, {
-				method: 'POST',
-				headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					username: database.info.user,
-					password
-				}),
-			});
-			const result = await response.json();
-			console.log('Token result', result);
-
-			const authToken: string | null = result.authToken;
+			const authToken: string | null = authTokenResponse.authToken;
 			console.log('Got auth token', authToken);
 			if (authToken === undefined) {
 				vscode.window.showErrorMessage('Invalid password, try again!');
@@ -168,7 +157,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					await context.globalState.update(`passwords.${id}`, password);
 				}
 				authTokens[id] = authToken!;
-				provider.displayConnectedDatabaseOptions(id);
+				provider.displayConnectedDatabaseOptions(databaseTreeItem);
 			}
 
 		} catch (error) {

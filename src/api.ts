@@ -1,6 +1,16 @@
 import fetch from 'cross-fetch';
-import { BundleResponse, DocumentsResponse } from "./types";
+import { BundleResponse, Database, DocumentsResponse } from "./types";
 
+async function getDatabaseAuthToken(database: Database, password: string) {
+    return await fetch(`https://${database.id}-${database.info.region}.apps.astra.datastax.com/api/rest/v1/auth`, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: database.info.user,
+            password
+        }),
+    }).then(res => res.json());
+}
 async function getTablesInKeyspace(endpoint: string, keyspace: string, authToken: string) {
     const query = `query getTablesInKeyspace ($keyspace: String!) {
                     keyspace(name: $keyspace) {
@@ -48,4 +58,4 @@ async function getDocuments(
         headers: { 'X-Cassandra-Token': authToken },
     }).then(res => res.json());
 }
-export { getTablesInKeyspace, getSecureBundle, getDocuments }
+export { getDatabaseAuthToken, getTablesInKeyspace, getSecureBundle, getDocuments }
