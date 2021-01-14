@@ -5,12 +5,12 @@ import * as util from 'util';
 import fetch from 'cross-fetch';
 import { Provider, AstraTreeItem } from './Provider';
 import { Database, TableDocuments } from './types';
-import { getDatabaseAuthToken, getDocumentsInTable, getSecureBundle, getTableSchemas } from './api';
+import { getDatabaseAuthToken, getDevOpsToken, getDocumentsInTable, getSecureBundle, getTableSchemas } from './api';
 import DocumentProvider from './DocumentProvider';
 const readFile = util.promisify(fs.readFile);
 
 export async function activate(context: vscode.ExtensionContext) {
-	let devOpsToken: string | null = null;
+	let devOpsToken: string | undefined = undefined;
 	let authTokens: { [key: string]: string | undefined } = {};
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
@@ -60,18 +60,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		const serviceCredentials = context.globalState.get<string>('serviceCredentials');
 		console.log('Retrieved credentials', serviceCredentials);
 		try {
-			const result = await fetch('https://api.astra.datastax.com/v2/authenticateServiceAccount', {
-				method: 'POST',
-				body: serviceCredentials,
-			}).then(res => res.json());
-
-			if (result.token === null) {
-				throw 'Failed to get token';
-			} else {
-				vscode.window.showInformationMessage('Token refreshed');
-				devOpsToken = result.token;
-				console.log('Got devOps token', devOpsToken);
-			}
+			const devOpsTokenResponse = await getDevOpsToken(serviceCredentials!);
+			devOpsToken = devOpsTokenResponse.token;
 		} catch (error) {
 			console.error(error);
 		}
@@ -88,7 +78,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		console.log('Fetched databases', databases);
 
 		provider.refresh(databases);
-		vscode.window.showInformationMessage('Token refreshed');
+		vscode.window.showInformationMessage('Databases refreshed');
 	})
 
 	vscode.commands.registerCommand('astra-vscode.openUrlInBrowser', (url: string) => {

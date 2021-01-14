@@ -1,3 +1,6 @@
+type DevOpsTokenResponse = {
+    token: string
+}
 type Database = {
     id: string,
     info: {
@@ -33,14 +36,6 @@ type DocumentsResponse = {
         [key: string]: any
     }
 }
-// enum ColumnKind {
-//     'COMPACT',
-//     UNKNOWN,
-//     PARTITION,
-//     CLUSTERING,
-//     REGULAR,
-//     STATIC,
-// }
 
 type Column = {
     kind: String,
@@ -64,6 +59,7 @@ type TableSchemasResponse = {
 }
 
 export {
+    DevOpsTokenResponse,
     Database,
     BundleResponse,
     Documents,

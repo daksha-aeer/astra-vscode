@@ -1,5 +1,12 @@
 import fetch from 'cross-fetch';
-import { BundleResponse, Database, DocumentsResponse, TableSchemasResponse } from "./types";
+import { BundleResponse, Database, DevOpsTokenResponse, DocumentsResponse, TableSchemasResponse } from "./types";
+
+async function getDevOpsToken(serviceCredentials: string): Promise<DevOpsTokenResponse> {
+    return await fetch('https://api.astra.datastax.com/v2/authenticateServiceAccount', {
+        method: 'POST',
+        body: serviceCredentials,
+    }).then(res => res.json());
+}
 
 async function getSecureBundle(id: string, devOpsToken: string): Promise<BundleResponse> {
     return await fetch(`https://api.astra.datastax.com/v2/databases/${id}/secureBundleURL`, {
@@ -67,6 +74,7 @@ async function getDocumentsInTable(
     }).then(res => res.json());
 }
 export {
+    getDevOpsToken,
     getSecureBundle,
     getDatabaseAuthToken,
     getTableSchemas,
