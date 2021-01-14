@@ -8,10 +8,18 @@ async function getDevOpsToken(serviceCredentials: string): Promise<DevOpsTokenRe
     }).then(res => res.json());
 }
 
-async function getSecureBundle(id: string, devOpsToken: string): Promise<BundleResponse> {
+async function getSecureBundleUrl(id: string, devOpsToken: string): Promise<BundleResponse> {
     return await fetch(`https://api.astra.datastax.com/v2/databases/${id}/secureBundleURL`, {
         method: 'POST',
         headers: { Accept: 'application/json', Authorization: `Bearer ${devOpsToken}` },
+    }).then(res => res.json());
+}
+
+async function getDatabases(devOpsToken: string): Promise<Database[]> {
+    return await fetch('https://api.astra.datastax.com/v2/databases?include=nonterminated', {
+        headers: {
+            Authorization: "Bearer " + devOpsToken,
+        }
     }).then(res => res.json());
 }
 
@@ -75,7 +83,8 @@ async function getDocumentsInTable(
 }
 export {
     getDevOpsToken,
-    getSecureBundle,
+    getSecureBundleUrl,
+    getDatabases,
     getDatabaseAuthToken,
     getTableSchemas,
     getDocumentsInTable

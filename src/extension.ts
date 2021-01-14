@@ -5,7 +5,14 @@ import * as util from 'util';
 import fetch from 'cross-fetch';
 import { Provider, AstraTreeItem } from './Provider';
 import { Database, TableDocuments } from './types';
-import { getDatabaseAuthToken, getDevOpsToken, getDocumentsInTable, getSecureBundle, getTableSchemas } from './api';
+import {
+	getDatabaseAuthToken,
+	getDatabases,
+	getDevOpsToken,
+	getDocumentsInTable,
+	getSecureBundleUrl,
+	getTableSchemas
+} from './api';
 import DocumentProvider from './DocumentProvider';
 const readFile = util.promisify(fs.readFile);
 
@@ -69,16 +76,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('astra-vscode.refreshUserDatabases', async () => {
 		console.log('Token for fetching databases', devOpsToken);
-
-		const databases: [Database] = await fetch('https://api.astra.datastax.com/v2/databases?include=nonterminated', {
-			headers: {
-				Authorization: "Bearer " + devOpsToken,
-			}
-		}).then(res => res.json());
+		const databases = await getDatabases(devOpsToken!);
 		console.log('Fetched databases', databases);
 
 		provider.refresh(databases);
-		vscode.window.showInformationMessage('Databases refreshed');
 	})
 
 	vscode.commands.registerCommand('astra-vscode.openUrlInBrowser', (url: string) => {
@@ -163,7 +164,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('astra-vscode.downloadSecureConnectBundle', async (id: string) => {
 		try {
-			const response = await getSecureBundle(id, devOpsToken!);
+			const response = await getSecureBundleUrl(id, devOpsToken!);
 			await vscode.commands.executeCommand('astra-vscode.openUrlInBrowser', response.downloadURL);
 		} catch (error) {
 			vscode.window.showErrorMessage('Failed to get bundle link');
@@ -189,7 +190,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		// Download bundle if not present
 		if (!bundlePresent) {
-			const bundleResponse = await getSecureBundle(database.id, devOpsToken!);
+			const bundleResponse = await getSecureBundleUrl(database.id, devOpsToken!);
 			const secureBundleURL = bundleResponse.downloadURL;
 			const response = await fetch(secureBundleURL);
 			const buffer = Buffer.from(await response.arrayBuffer());
