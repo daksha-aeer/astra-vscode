@@ -11,7 +11,8 @@ import {
 	getDevOpsToken,
 	getDocumentsInTable,
 	getSecureBundleUrl,
-	getTableSchemas
+	getTableSchemas,
+	parkDatabase
 } from './api';
 import DocumentProvider from './DocumentProvider';
 const readFile = util.promisify(fs.readFile);
@@ -19,6 +20,7 @@ const readFile = util.promisify(fs.readFile);
 export async function activate(context: vscode.ExtensionContext) {
 	let devOpsToken: string | undefined = undefined;
 	let authTokens: { [key: string]: string | undefined } = {};
+	const connectedDatabases: AstraTreeItem[] = [];
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
 
@@ -149,6 +151,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				}
 				authTokens[id] = authToken!;
 				provider.displayConnectedDatabaseOptions(databaseTreeItem);
+				connectedDatabases.push(databaseTreeItem);
 			}
 
 		} catch (error) {
@@ -318,6 +321,27 @@ export async function activate(context: vscode.ExtensionContext) {
 			JSON.stringify(documentResponse.data)
 		);
 	})
+	vscode.commands.registerCommand('astra-vscode.parkDatabase', async (databaseItem: AstraTreeItem) => {
+		const database = databaseItem.database!;
+		console.log('Parking database', database);
+
+		try {
+			const parkResponse = await parkDatabase(database.id, devOpsToken!);
+			console.log('Parking response', parkResponse);
+			await refreshItems();
+		} catch (error) {
+			console.log('Failed to park', error);
+		}
+
+	})
+
+	async function refreshItems() {
+		await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
+		for (const databaseItem of connectedDatabases) {
+			await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken', databaseItem);
+		}
+
+	}
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 }

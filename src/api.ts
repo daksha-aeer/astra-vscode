@@ -23,6 +23,15 @@ async function getDatabases(devOpsToken: string): Promise<Database[]> {
     }).then(res => res.json());
 }
 
+async function parkDatabase(databaseId: string, devOpsToken: string) {
+    return await fetch(`https://api.astra.datastax.com/v2/databases/${databaseId}/park`, {
+        method: 'POST',
+        headers: {
+            Authorization: "Bearer " + devOpsToken,
+        }
+    })
+}
+
 async function getDatabaseAuthToken(database: Database, password: string) {
     return await fetch(`https://${database.id}-${database.info.region}.apps.astra.datastax.com/api/rest/v1/auth`, {
         method: 'POST',
@@ -84,6 +93,7 @@ async function getDocumentsInTable(
 export {
     getDevOpsToken,
     getSecureBundleUrl,
+    parkDatabase,
     getDatabases,
     getDatabaseAuthToken,
     getTableSchemas,

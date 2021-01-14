@@ -24,6 +24,7 @@
 		"onCommand:astra-vscode.viewDocument",
 		"onCommand:astra-vscode.paginateDocuments",
 		"onCommand:astra-vscode.searchDocuments",
+		"onCommand:astra-vscode.parkDatabase",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -110,6 +111,10 @@
 					"light": "resources/light/search.svg",
 					"dark": "resources/dark/search.svg"
 				}
+			},
+			{
+				"command": "astra-vscode.parkDatabase",
+				"title": "Park database"
 			}
 		],
 		"views": {
@@ -156,6 +161,10 @@
 					"command": "astra-vscode.searchDocuments",
 					"when": "view == databases-view && viewItem == documents",
 					"group": "inline"
+				},
+				{
+					"command": "astra-vscode.parkDatabase",
+					"when": "view == databases-view && viewItem == active-database"
 				}
 			]
 		}

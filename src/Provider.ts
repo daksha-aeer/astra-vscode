@@ -12,7 +12,9 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
     refresh(databases: Database[]) {
         this.data = databases.map((database) => {
             // Database item with group headers
-            const databaseItem = new AstraTreeItem(database.info.name, undefined, undefined, 'database', database);
+            const databaseItem = new AstraTreeItem(database.info.name, undefined, undefined, 'database');
+            console.log('Adding database to db item', database);
+            databaseItem.database = database;
 
             // Database region and status
             const status = database.status;
@@ -262,7 +264,7 @@ export class AstraTreeItem extends vscode.TreeItem {
     keyspace?: string;
     tableName?: string;
 
-    constructor(label: string, command?: vscode.Command, children?: AstraTreeItem[], contextValue?: string, database?: Database) {
+    constructor(label: string, command?: vscode.Command, children?: AstraTreeItem[], contextValue?: string) {
         super(label,
             children === undefined ?
                 vscode.TreeItemCollapsibleState.None :
@@ -271,6 +273,5 @@ export class AstraTreeItem extends vscode.TreeItem {
         this.children = children;
         this.command = command;
         this.contextValue = contextValue; // to show connect button only for databases
-        this.database = database;
     }
 }
