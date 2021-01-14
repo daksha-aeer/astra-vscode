@@ -13,7 +13,8 @@ import {
 	getSecureBundleUrl,
 	getTableSchemas,
 	parkDatabase,
-	terminateDatabase
+	terminateDatabase,
+	unparkDatabase
 } from './api';
 import DocumentProvider from './DocumentProvider';
 const readFile = util.promisify(fs.readFile);
@@ -343,7 +344,20 @@ export async function activate(context: vscode.ExtensionContext) {
 			console.log('Termination response', terminateResponse);
 			setTimeout(refreshItems, 10000);
 		} catch (error) {
-			console.log('Failed to park', error);
+			console.log('Failed to terminate', error);
+		}
+	})
+
+	vscode.commands.registerCommand('astra-vscode.unparkDatabase', async (databaseItem: AstraTreeItem) => {
+		const database = databaseItem.database!;
+		console.log('Unparking database', database);
+
+		try {
+			const unparkResponse = await unparkDatabase(database.id, devOpsToken!);
+			console.log('Unpark response', unparkResponse);
+			setTimeout(refreshItems, 10000);
+		} catch (error) {
+			console.log('Failed to unpark', error);
 		}
 	})
 

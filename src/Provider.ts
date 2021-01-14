@@ -20,7 +20,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
             const status = database.status;
             databaseItem.description = `${database.info.region} / ${status.toLowerCase()}`;
             // Database status icon
-            let iconColor = 'terminal.ansiBrightGreen';
+            let iconColor = 'terminal.ansiBrightYellow';
             if (status === 'ACTIVE') {
                 iconColor = 'terminal.ansiBrightGreen';
             } else if (status === 'TERMINATING') {

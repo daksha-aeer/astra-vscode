@@ -25,6 +25,7 @@
 		"onCommand:astra-vscode.paginateDocuments",
 		"onCommand:astra-vscode.searchDocuments",
 		"onCommand:astra-vscode.parkDatabase",
+		"onCommand:astra-vscode.unparkDatabase",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -119,6 +120,10 @@
 			{
 				"command": "astra-vscode.terminateDatabase",
 				"title": "Terminate"
+			},
+			{
+				"command": "astra-vscode.unparkDatabase",
+				"title": "Unpark"
 			}
 		],
 		"views": {
@@ -184,6 +189,10 @@
 				},
 				{
 					"command": "astra-vscode.terminateDatabase",
+					"when": "view == databases-view && viewItem == parked-database"
+				},
+				{
+					"command": "astra-vscode.unparkDatabase",
 					"when": "view == databases-view && viewItem == parked-database"
 				}
 			]

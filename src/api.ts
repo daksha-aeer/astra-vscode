@@ -41,6 +41,15 @@ async function terminateDatabase(databaseId: string, devOpsToken: string) {
     })
 }
 
+async function unparkDatabase(databaseId: string, devOpsToken: string) {
+    return await fetch(`https://api.astra.datastax.com/v2/databases/${databaseId}/unpark`, {
+        method: 'POST',
+        headers: {
+            Authorization: 'Bearer ' + devOpsToken,
+        }
+    })
+}
+
 async function getDatabaseAuthToken(database: Database, password: string) {
     return await fetch(`https://${database.id}-${database.info.region}.apps.astra.datastax.com/api/rest/v1/auth`, {
         method: 'POST',
@@ -104,6 +113,7 @@ export {
     getSecureBundleUrl,
     parkDatabase,
     terminateDatabase,
+    unparkDatabase,
     getDatabases,
     getDatabaseAuthToken,
     getTableSchemas,
