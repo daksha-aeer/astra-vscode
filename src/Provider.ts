@@ -50,8 +50,9 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 new AstraTreeItem('Manage', undefined, manageDatabaseChildren),
             ], 'database', database)
 
-            // Database status description and icon
-            databaseItem.description = database.status;
+            // Database region and status
+            databaseItem.description = `${database.info.region} / ${database.status.toLowerCase()}`;
+            // Database status icon
             const iconColor = (database.status === 'ACTIVE') ?
                 'terminal.ansiBrightGreen' :
                 'terminal.ansiYellow';
