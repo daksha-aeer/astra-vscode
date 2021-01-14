@@ -19,8 +19,7 @@ const readFile = util.promisify(fs.readFile);
 
 export async function activate(context: vscode.ExtensionContext) {
 	let devOpsToken: string | undefined = undefined;
-	let authTokens: { [key: string]: string | undefined } = {};
-	const connectedDatabases: AstraTreeItem[] = [];
+	let authTokens: { [databaseId: string]: string } = {};
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
 
@@ -151,7 +150,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				}
 				authTokens[id] = authToken!;
 				provider.displayConnectedDatabaseOptions(databaseTreeItem);
-				connectedDatabases.push(databaseTreeItem);
 			}
 
 		} catch (error) {
@@ -328,7 +326,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		try {
 			const parkResponse = await parkDatabase(database.id, devOpsToken!);
 			console.log('Parking response', parkResponse);
-			await refreshItems();
+			setTimeout(refreshItems, 10000);
 		} catch (error) {
 			console.log('Failed to park', error);
 		}
@@ -336,12 +334,24 @@ export async function activate(context: vscode.ExtensionContext) {
 	})
 
 	async function refreshItems() {
-		await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
-		for (const databaseItem of connectedDatabases) {
-			await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken', databaseItem);
-		}
+		await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 
+		for (const databaseItem of provider.data!) {
+			const databaseId = databaseItem.database!.id;
+			// Reconnect if token exists
+			if (databaseId in authTokens) {
+				provider.displayConnectedDatabaseOptions(databaseItem);
+			}
+		}
 	}
+
+	// Cron job to refresh databases
+	const REFRESH_INTERVAL = 25 * 1000; // 30 seconds
+	setInterval(async () => {
+		console.log("Cron job running");
+		await refreshItems();
+	}, REFRESH_INTERVAL);
+
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 }
