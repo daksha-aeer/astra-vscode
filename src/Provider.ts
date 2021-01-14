@@ -167,10 +167,6 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     tableChildren.push(documentsGroupItem);
                 }
 
-                // if (index !== 0) {
-                //     tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-                // }
-
                 return tableItem;
             })
             keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
@@ -236,9 +232,4 @@ export class AstraTreeItem extends vscode.TreeItem {
         this.contextValue = contextValue; // to show connect button only for databases
         this.database = database;
     }
-
-    iconPath?= {
-        light: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'Database.svg'),
-        dark: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'Database.svg'),
-    };
 }
