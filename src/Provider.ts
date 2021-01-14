@@ -11,6 +11,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
     refresh(databases: Database[]) {
         this.data = databases.map((database) => {
+            // API group items
             const apiChildren = [
                 new AstraTreeItem('GraphQL schema', {
                     title: 'GraphQL schema',
@@ -29,6 +30,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 }),
             ]
 
+            // Database management items
             const manageDatabaseChildren = [
                 new AstraTreeItem('DataStax Studio', {
                     title: 'Launch DataStax Studio',
@@ -42,11 +44,22 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 }),
             ]
 
+            // Database item with group headers
             const databaseItem = new AstraTreeItem(database.info.name, undefined, [
                 new AstraTreeItem('API', undefined, apiChildren),
                 new AstraTreeItem('Manage', undefined, manageDatabaseChildren),
             ], 'database', database)
 
+            // Database status description and icon
+            databaseItem.description = database.status;
+            const iconColor = (database.status === 'ACTIVE') ?
+                'terminal.ansiBrightGreen' :
+                'terminal.ansiYellow';
+            databaseItem.iconPath = new vscode.ThemeIcon(
+                'circle-filled', new vscode.ThemeColor(iconColor)
+            );
+
+            // Keyspace items
             const keyspaceItems = database.info.keyspaces.map((keyspace) => {
                 const keyspaceItem = new AstraTreeItem(keyspace);
                 keyspaceItem.database = database;
