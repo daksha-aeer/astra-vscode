@@ -11,6 +11,28 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
     refresh(databases: Database[]) {
         this.data = databases.map((database) => {
+            // Database item with group headers
+            const databaseItem = new AstraTreeItem(database.info.name, undefined, undefined, 'database', database);
+
+            // Database region and status
+            const status = database.status;
+            databaseItem.description = `${database.info.region} / ${status.toLowerCase()}`;
+            // Database status icon
+            const iconColor = (status === 'ACTIVE') ?
+                'terminal.ansiBrightGreen' :
+                'terminal.ansiYellow';
+            databaseItem.iconPath = new vscode.ThemeIcon(
+                'circle-filled', new vscode.ThemeColor(iconColor)
+            );
+
+            if (status !== 'ACTIVE') {
+                return databaseItem;
+            }
+
+            // If database is active
+            databaseItem.contextValue = 'active-database';
+            databaseItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+
             // API group items
             const apiChildren = [
                 new AstraTreeItem('GraphQL schema', {
@@ -29,6 +51,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     arguments: [database.id],
                 }),
             ]
+            const apiGroupItem = new AstraTreeItem('API', undefined, apiChildren);
 
             // Database management items
             const manageDatabaseChildren = [
@@ -43,22 +66,9 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     arguments: [database.grafanaUrl],
                 }),
             ]
+            const manageGroupItem = new AstraTreeItem('Manage', undefined, manageDatabaseChildren);
 
-            // Database item with group headers
-            const databaseItem = new AstraTreeItem(database.info.name, undefined, [
-                new AstraTreeItem('API', undefined, apiChildren),
-                new AstraTreeItem('Manage', undefined, manageDatabaseChildren),
-            ], 'database', database)
-
-            // Database region and status
-            databaseItem.description = `${database.info.region} / ${database.status.toLowerCase()}`;
-            // Database status icon
-            const iconColor = (database.status === 'ACTIVE') ?
-                'terminal.ansiBrightGreen' :
-                'terminal.ansiYellow';
-            databaseItem.iconPath = new vscode.ThemeIcon(
-                'circle-filled', new vscode.ThemeColor(iconColor)
-            );
+            databaseItem.children = [apiGroupItem, manageGroupItem];
 
             // Keyspace items
             const keyspaceItems = database.info.keyspaces.map((keyspace) => {

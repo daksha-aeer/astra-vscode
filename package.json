@@ -144,7 +144,7 @@
 			"view/item/context": [
 				{
 					"command": "astra-vscode.connectToDatabase",
-					"when": "view == databases-view && viewItem == database",
+					"when": "view == databases-view && viewItem == active-database",
 					"group": "inline"
 				},
 				{
