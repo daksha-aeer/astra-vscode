@@ -20,13 +20,17 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
             const status = database.status;
             databaseItem.description = `${database.info.region} / ${status.toLowerCase()}`;
             // Database status icon
-            const iconColor = (status === 'ACTIVE') ?
-                'terminal.ansiBrightGreen' :
-                'terminal.ansiYellow';
+            let iconColor = 'terminal.ansiBrightGreen';
+            if (status === 'ACTIVE') {
+                iconColor = 'terminal.ansiBrightGreen';
+            } else if (status === 'TERMINATING') {
+                iconColor = 'terminal.ansiBrightRed';
+            }
             databaseItem.iconPath = new vscode.ThemeIcon(
                 'circle-filled', new vscode.ThemeColor(iconColor)
             );
-
+            databaseItem.contextValue = `${status.toLowerCase()}-database`;
+            // Do not add children if database is not active
             if (status !== 'ACTIVE') {
                 return databaseItem;
             }
@@ -92,7 +96,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
     displayConnectedDatabaseOptions(dbItem: AstraTreeItem) {
         const database = dbItem.database!;
-        for (const databaseChildItem of dbItem.children!) {
+        for (const databaseChildItem of dbItem?.children ?? []) {
             let newChild: AstraTreeItem | undefined = undefined;
             switch (databaseChildItem.label) {
                 case 'API': {
@@ -120,7 +124,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
             }
         }
 
-        dbItem.contextValue = 'database-connected';
+        dbItem.contextValue = 'connected-database';
         this._onDidChangeTreeData.fire();
     }
 

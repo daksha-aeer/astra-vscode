@@ -114,7 +114,11 @@
 			},
 			{
 				"command": "astra-vscode.parkDatabase",
-				"title": "Park database"
+				"title": "Park"
+			},
+			{
+				"command": "astra-vscode.terminateDatabase",
+				"title": "Terminate"
 			}
 		],
 		"views": {
@@ -165,6 +169,22 @@
 				{
 					"command": "astra-vscode.parkDatabase",
 					"when": "view == databases-view && viewItem == active-database"
+				},
+				{
+					"command": "astra-vscode.terminateDatabase",
+					"when": "view == databases-view && viewItem == active-database"
+				},
+				{
+					"command": "astra-vscode.parkDatabase",
+					"when": "view == databases-view && viewItem == connected-database"
+				},
+				{
+					"command": "astra-vscode.terminateDatabase",
+					"when": "view == databases-view && viewItem == connected-database"
+				},
+				{
+					"command": "astra-vscode.terminateDatabase",
+					"when": "view == databases-view && viewItem == parked-database"
 				}
 			]
 		}

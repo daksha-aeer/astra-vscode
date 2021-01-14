@@ -18,7 +18,7 @@ async function getSecureBundleUrl(id: string, devOpsToken: string): Promise<Bund
 async function getDatabases(devOpsToken: string): Promise<Database[]> {
     return await fetch('https://api.astra.datastax.com/v2/databases?include=nonterminated', {
         headers: {
-            Authorization: "Bearer " + devOpsToken,
+            Authorization: 'Bearer ' + devOpsToken,
         }
     }).then(res => res.json());
 }
@@ -27,7 +27,16 @@ async function parkDatabase(databaseId: string, devOpsToken: string) {
     return await fetch(`https://api.astra.datastax.com/v2/databases/${databaseId}/park`, {
         method: 'POST',
         headers: {
-            Authorization: "Bearer " + devOpsToken,
+            Authorization: 'Bearer ' + devOpsToken,
+        }
+    })
+}
+
+async function terminateDatabase(databaseId: string, devOpsToken: string) {
+    return await fetch(`https://api.astra.datastax.com/v2/databases/${databaseId}/terminate`, {
+        method: 'POST',
+        headers: {
+            Authorization: 'Bearer ' + devOpsToken,
         }
     })
 }
@@ -94,6 +103,7 @@ export {
     getDevOpsToken,
     getSecureBundleUrl,
     parkDatabase,
+    terminateDatabase,
     getDatabases,
     getDatabaseAuthToken,
     getTableSchemas,

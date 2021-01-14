@@ -12,7 +12,8 @@ import {
 	getDocumentsInTable,
 	getSecureBundleUrl,
 	getTableSchemas,
-	parkDatabase
+	parkDatabase,
+	terminateDatabase
 } from './api';
 import DocumentProvider from './DocumentProvider';
 const readFile = util.promisify(fs.readFile);
@@ -319,6 +320,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			JSON.stringify(documentResponse.data)
 		);
 	})
+
 	vscode.commands.registerCommand('astra-vscode.parkDatabase', async (databaseItem: AstraTreeItem) => {
 		const database = databaseItem.database!;
 		console.log('Parking database', database);
@@ -330,13 +332,25 @@ export async function activate(context: vscode.ExtensionContext) {
 		} catch (error) {
 			console.log('Failed to park', error);
 		}
+	})
 
+	vscode.commands.registerCommand('astra-vscode.terminateDatabase', async (databaseItem: AstraTreeItem) => {
+		const database = databaseItem.database!;
+		console.log('Terminating database', database);
+
+		try {
+			const terminateResponse = await terminateDatabase(database.id, devOpsToken!);
+			console.log('Termination response', terminateResponse);
+			setTimeout(refreshItems, 10000);
+		} catch (error) {
+			console.log('Failed to park', error);
+		}
 	})
 
 	async function refreshItems() {
 		await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 
-		for (const databaseItem of provider.data!) {
+		for (const databaseItem of provider?.data ?? []) {
 			const databaseId = databaseItem.database!.id;
 			// Reconnect if token exists
 			if (databaseId in authTokens) {
