@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { Database, Documents, DocumentsResponse, TableDocuments } from './types';
+import { Database, DocumentsResponse, TableDocuments, TableSchema } from './types';
 
 export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
@@ -99,17 +99,30 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
     }
 
     displayTablesAndDocsForKeyspace(
-        keyspaceItem: AstraTreeItem, tables: { name: string }[],
+        keyspaceItem: AstraTreeItem, tables: TableSchema[],
         documentsPerTable: TableDocuments, pageState?: string
     ) {
         if (tables.length > 0) {
             keyspaceItem.children = tables.map((table, index) => {
+                // Table schema
+                const tableColumnItems = table.columns.map((column) => {
+                    const columnItem = new AstraTreeItem(column.name);
+                    columnItem.description = column.type.basic;
+                    // TODO Add icon
+                    return columnItem;
+                });
+                const schemaItem = new AstraTreeItem('Schema', undefined, tableColumnItems);
+                schemaItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+
+                const tableChildren = [schemaItem];
+
+                // Table item
                 const tableName = table.name;
-                const tableChildren = [
-                    new AstraTreeItem('Schema'),
-                ]
                 const tableItem = new AstraTreeItem(tableName, undefined, tableChildren);
+                tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
                 const tableDocuments = documentsPerTable[tableName];
+
+                // Table documents
                 if (tableDocuments) {
                     // TODO special icon for collection table
                     tableItem.iconPath = {
@@ -134,6 +147,8 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                         light: path.join(__filename, '..', '..', 'resources', 'light', 'documents.svg'),
                         dark: path.join(__filename, '..', '..', 'resources', 'dark', 'documents.svg'),
                     }
+
+                    // Paginate documents
                     documentsGroupItem.database = keyspaceItem.database;
                     documentsGroupItem.keyspace = keyspaceItem.keyspace;
                     documentsGroupItem.tableName = tableName;
@@ -152,9 +167,9 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     tableChildren.push(documentsGroupItem);
                 }
 
-                if (index !== 0) {
-                    tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
-                }
+                // if (index !== 0) {
+                //     tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                // }
 
                 return tableItem;
             })

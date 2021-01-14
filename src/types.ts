@@ -26,6 +26,7 @@ type Documents = {
 type TableDocuments = {
     [key: string]: Documents | undefined
 }
+
 type DocumentsResponse = {
     pageState?: string,
     data: {
@@ -33,4 +34,25 @@ type DocumentsResponse = {
     }
 }
 
-export { Database, BundleResponse, Documents, TableDocuments, DocumentsResponse }
+type Column = {
+    kind: string,
+    name: string,
+    type: {
+        basic: string,
+    }
+}
+
+type TableSchema = {
+    name: string,
+    columns: Column[]
+}
+
+type TableSchemasResponse = {
+    data: {
+        keyspace: {
+            tables: TableSchema[]
+        }
+    } | undefined
+}
+
+export { Database, BundleResponse, Documents, TableSchema, TableDocuments, DocumentsResponse, TableSchemasResponse }

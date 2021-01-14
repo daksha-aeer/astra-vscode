@@ -4,8 +4,8 @@ import * as fs from 'fs';
 import * as util from 'util';
 import fetch from 'cross-fetch';
 import { Provider, AstraTreeItem } from './Provider';
-import { BundleResponse, Database, Documents, TableDocuments } from './types';
-import { getDatabaseAuthToken, getDocuments, getSecureBundle, getTablesInKeyspace } from './api';
+import { Database, TableDocuments } from './types';
+import { getDatabaseAuthToken, getDocumentsInTable, getSecureBundle, getTableSchemas } from './api';
 import DocumentProvider from './DocumentProvider';
 const readFile = util.promisify(fs.readFile);
 
@@ -224,20 +224,24 @@ export async function activate(context: vscode.ExtensionContext) {
 			return vscode.window.showInformationMessage('Connect to database to explore keyspaces');
 		}
 		try {
-			const tableResponse = await getTablesInKeyspace(
-				`${database.graphqlUrl}-schema`, keyspace, authTokens[database.id]!
+			// Get schema
+			const tableResponse = await getTableSchemas(
+				database.graphqlUrl + '-schema',
+				keyspace,
+				databaseToken
 			);
+
 			console.log('Got tables', tableResponse);
-			const tables: { name: string }[] | undefined = tableResponse.data.keyspace.tables;
+			const tables = tableResponse.data?.keyspace.tables;
 
 			let pageState: string | undefined = undefined;
 			if (tables) {
-				// Get documents
 				let documentsPerTable: TableDocuments = {};
 				for (const table of tables) {
 					try {
+						// Get documents
 						console.log('Getting documents for table', table.name);
-						const documentResponse = await getDocuments(
+						const documentResponse = await getDocumentsInTable(
 							database.dataEndpointUrl,
 							keyspace,
 							table.name,
@@ -247,6 +251,7 @@ export async function activate(context: vscode.ExtensionContext) {
 						pageState = documentResponse.pageState;
 						console.log('Got pageState', pageState);
 						documentsPerTable[table.name] = documentResponse?.data;
+
 					} catch (error) {
 						console.log('No documents for this table');
 					}
@@ -279,7 +284,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			return vscode.window.showInformationMessage('Connect to database to explore keyspaces');
 		}
 		try {
-			const documentResponse = await getDocuments(
+			const documentResponse = await getDocumentsInTable(
 				database.dataEndpointUrl,
 				keyspace,
 				tableName,
@@ -307,7 +312,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			placeHolder: JSON.stringify({ "car": { "$eq": "ferrari" } }),
 		})
 
-		const documentResponse = await getDocuments(
+		const documentResponse = await getDocumentsInTable(
 			database.dataEndpointUrl,
 			documentsGroupItem.keyspace!,
 			documentsGroupItem.tableName!,
