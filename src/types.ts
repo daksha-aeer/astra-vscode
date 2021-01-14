@@ -33,9 +33,17 @@ type DocumentsResponse = {
         [key: string]: any
     }
 }
+// enum ColumnKind {
+//     'COMPACT',
+//     UNKNOWN,
+//     PARTITION,
+//     CLUSTERING,
+//     REGULAR,
+//     STATIC,
+// }
 
 type Column = {
-    kind: string,
+    kind: String,
     name: string,
     type: {
         basic: string,
@@ -55,4 +63,12 @@ type TableSchemasResponse = {
     } | undefined
 }
 
-export { Database, BundleResponse, Documents, TableSchema, TableDocuments, DocumentsResponse, TableSchemasResponse }
+export {
+    Database,
+    BundleResponse,
+    Documents,
+    TableSchema,
+    TableDocuments,
+    DocumentsResponse,
+    TableSchemasResponse,
+}

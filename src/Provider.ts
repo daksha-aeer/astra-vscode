@@ -109,11 +109,29 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                     const columnItem = new AstraTreeItem(column.name);
                     columnItem.description = column.type.basic;
                     // TODO Add icon
+                    let columnIconName = 'column.svg';
+                    console.log('Got column type', column.kind);
+                    switch (column.kind) {
+                        case 'PARTITION': {
+                            columnIconName = 'partitioning-key.svg';
+                        } break;
+                        case 'CLUSTERING': {
+                            columnIconName = 'clustering-key.svg';
+                        } break;
+                    }
+                    columnItem.iconPath = {
+                        light: path.join(__filename, '..', '..', 'resources', 'light', columnIconName),
+                        dark: path.join(__filename, '..', '..', 'resources', 'dark', columnIconName),
+                    }
                     return columnItem;
                 });
                 const schemaItem = new AstraTreeItem('Schema', undefined, tableColumnItems);
-                schemaItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
 
+                schemaItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                schemaItem.iconPath = {
+                    light: path.join(__filename, '..', '..', 'resources', 'light', 'schema.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'schema.svg'),
+                }
                 const tableChildren = [schemaItem];
 
                 // Table item
@@ -124,7 +142,6 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
                 // Table documents
                 if (tableDocuments) {
-                    // TODO special icon for collection table
                     tableItem.iconPath = {
                         light: path.join(__filename, '..', '..', 'resources', 'light', 'folder-closed.svg'),
                         dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder-closed.svg'),
