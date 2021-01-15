@@ -85,9 +85,9 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 return keyspaceItem;
             })
 
-            databaseItem.children!.push(
-                new AstraTreeItem('Keyspaces', undefined, keyspaceItems)
-            )
+            const keyspaceParentItem = new AstraTreeItem('Keyspaces', undefined, keyspaceItems);
+            keyspaceParentItem.contextValue = 'keyspace-parent';
+            databaseItem.children!.push(keyspaceParentItem);
 
             return databaseItem;
         });

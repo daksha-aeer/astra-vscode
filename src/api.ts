@@ -89,6 +89,16 @@ async function getTableSchemas(
     }).then(res => res.json());
 }
 
+async function createCollection(endpoint: string, keyspace: string, collection: string, authToken: string) {
+    return await fetch(`${endpoint}/v2/namespaces/${keyspace}/collections`, {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Cassandra-Token': authToken },
+        body: JSON.stringify({
+            name: collection,
+        }),
+    });
+}
+
 async function getDocumentsInTable(
     endpoint: string, keyspace: string, table: string, authToken: string, pageState?: string, searchQuery?: string
 ): Promise<DocumentsResponse> {
@@ -117,5 +127,6 @@ export {
     getDatabases,
     getDatabaseAuthToken,
     getTableSchemas,
-    getDocumentsInTable
+    getDocumentsInTable,
+    createCollection,
 }

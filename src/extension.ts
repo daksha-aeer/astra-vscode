@@ -6,6 +6,7 @@ import fetch from 'cross-fetch';
 import { Provider, AstraTreeItem } from './Provider';
 import { Database, TableDocuments } from './types';
 import {
+	createCollection,
 	getDatabaseAuthToken,
 	getDatabases,
 	getDevOpsToken,
@@ -370,6 +371,36 @@ export async function activate(context: vscode.ExtensionContext) {
 			setTimeout(refreshItems, 10000);
 		} catch (error) {
 			console.log('Failed to unpark', error);
+		}
+	})
+
+	vscode.commands.registerCommand('astra-vscode.createCollection', async (keyspaceItem: AstraTreeItem) => {
+		const database = keyspaceItem.database!;
+		const keyspace = keyspaceItem.keyspace!;
+		const databaseToken = authTokens[database.id];
+		console.log('Adding new collection to', keyspace);
+
+		const collectionName = await vscode.window.showInputBox({
+			prompt: 'Collection name',
+		})
+
+		if (collectionName) {
+			try {
+				const newCollectionResponse = await createCollection(
+					database.dataEndpointUrl, keyspace, collectionName, databaseToken
+				);
+				console.log('Collection creation response', newCollectionResponse.body);
+				if (newCollectionResponse.status === 201) {
+					vscode.window.showInformationMessage('Collection created');
+					return await refreshItems();
+				} else {
+					vscode.window.showErrorMessage('Failed to create');
+				}
+			} catch (error) {
+				vscode.window.showErrorMessage('Failed to create');
+			}
+		} else {
+			vscode.window.showErrorMessage('No name provided');
 		}
 	})
 
