@@ -129,10 +129,10 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
     }
 
     displayTablesAndDocsForKeyspace(
-        keyspaceItem: AstraTreeItem, tables: TableSchema[],
-        documentsPerTable: TableDocuments, pageState?: string
+        keyspaceItem: AstraTreeItem, documentsPerTable: TableDocuments,
+        tables?: TableSchema[], pageState?: string
     ) {
-        if (tables.length > 0) {
+        if (tables && tables.length > 0) {
             keyspaceItem.children = tables.map((table, index) => {
                 // Table schema
                 const tableColumnItems = table.columns.map((column) => {
@@ -217,10 +217,11 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 return tableItem;
             })
             keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
-            keyspaceItem.contextValue = 'connected-keyspace';
+
         } else {
             keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
         }
+        keyspaceItem.contextValue = 'connected-keyspace';
 
         this._onDidChangeTreeData.fire();
     }

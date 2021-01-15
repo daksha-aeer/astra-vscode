@@ -233,9 +233,11 @@ export async function activate(context: vscode.ExtensionContext) {
 			console.log('Got tables', tableResponse);
 			const tables = tableResponse.data?.keyspace.tables;
 
+			let documentsPerTable: TableDocuments = {};
 			let pageState: string | undefined = undefined;
-			if (tables) {
-				let documentsPerTable: TableDocuments = {};
+			// TODO when no tables
+			if (tables && Array.isArray(tables) && tables.length > 0) {
+
 				for (const table of tables) {
 					try {
 						// Get documents
@@ -258,11 +260,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				// pass document
 				console.log('Got all documents', documentsPerTable);
-				provider.displayTablesAndDocsForKeyspace(keyspaceItem, tables, documentsPerTable, pageState);
+
 
 			} else {
 				console.log('No tables in keyspace');
 			}
+			provider.displayTablesAndDocsForKeyspace(keyspaceItem, documentsPerTable, tables, pageState);
 
 		} catch (error) {
 			console.error('Failed to get tables', error);
@@ -370,7 +373,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (devOpsToken) {
 			await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 
-			// Refresh connected databases
+			// Refresh connected databases and keyspaces
 			for (const databaseItem of provider?.data ?? []) {
 				const databaseId = databaseItem.database!.id;
 				// Reconnect if token exists
