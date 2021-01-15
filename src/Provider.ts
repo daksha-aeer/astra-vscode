@@ -179,7 +179,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
 
                     let documentChildren: AstraTreeItem[] = [];
                     for (const documentId in tableDocuments) {
-                        const documentBody = tableDocuments[documentId].data;
+                        const documentBody = tableDocuments[documentId];
                         documentChildren.push(
                             new AstraTreeItem(documentId, {
                                 title: 'View document',

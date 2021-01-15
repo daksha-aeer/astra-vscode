@@ -7,8 +7,6 @@ export default class DocumentProvider implements vscode.TextDocumentContentProvi
     provideTextDocumentContent(uri: vscode.Uri): string {
         const uriParams = new URLSearchParams(uri.query);
         const body = uriParams.get('body')!;
-        const formattedBody = JSON.stringify(JSON.parse(body), null, 2);
-        console.log('Displaying', formattedBody);
-        return formattedBody;
+        return body;
     }
 };

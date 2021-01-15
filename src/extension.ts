@@ -41,7 +41,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('astra-vscode.viewDocument', async (documentName: string, documentBody: any) => {
 		console.log('Opening document', documentName);
 		console.log('Document body', documentBody);
-		const uri = vscode.Uri.parse(`${documentsScheme}:${documentName}.json?body=${documentBody}`);
+		const formattedBody = JSON.stringify(documentBody, null, 2);
+		const uri = vscode.Uri.parse(`${documentsScheme}:${documentName}.json?body=${formattedBody}`);
 		try {
 			const doc = await vscode.workspace.openTextDocument(uri);
 			await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Two });
