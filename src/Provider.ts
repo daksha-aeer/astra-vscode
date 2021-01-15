@@ -157,7 +157,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 });
                 const schemaItem = new AstraTreeItem('Schema', undefined, tableColumnItems);
 
-                schemaItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                schemaItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
                 schemaItem.iconPath = {
                     light: path.join(__filename, '..', '..', 'resources', 'light', 'schema.svg'),
                     dark: path.join(__filename, '..', '..', 'resources', 'dark', 'schema.svg'),
@@ -167,7 +167,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                 // Table item
                 const tableName = table.name;
                 const tableItem = new AstraTreeItem(tableName, undefined, tableChildren);
-                tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
                 const tableDocuments = documentsPerTable[tableName];
 
                 // Table documents
@@ -209,7 +209,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
                         )
                     }
                     documentsGroupItem.children = documentChildren;
-                    documentsGroupItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                    documentsGroupItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
                     console.log('Table documents group item', documentsGroupItem);
                     tableChildren.push(documentsGroupItem);
                 }
@@ -221,6 +221,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         } else {
             keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
         }
+        console.log('keyspace connected', keyspaceItem.label);
         keyspaceItem.contextValue = 'connected-keyspace';
 
         this._onDidChangeTreeData.fire();

@@ -22,6 +22,7 @@ const readFile = util.promisify(fs.readFile);
 export async function activate(context: vscode.ExtensionContext) {
 	let devOpsToken: string | undefined = undefined;
 	let authTokens: { [databaseId: string]: string } = {};
+	let connectedKeyspaces: string[] = [];
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
 
@@ -265,6 +266,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			} else {
 				console.log('No tables in keyspace');
 			}
+			connectedKeyspaces.push(keyspace);
 			provider.displayTablesAndDocsForKeyspace(keyspaceItem, documentsPerTable, tables, pageState);
 
 		} catch (error) {
@@ -379,6 +381,17 @@ export async function activate(context: vscode.ExtensionContext) {
 				// Reconnect if token exists
 				if (databaseId in authTokens) {
 					provider.displayConnectedDatabaseOptions(databaseItem);
+
+					const keyspaceGroupItem = databaseItem.children![2];
+
+					const connectedKeyspaceNames = [...connectedKeyspaces];
+					connectedKeyspaces = [];
+					for (const keyspaceItem of keyspaceGroupItem.children ?? []) {
+						if (connectedKeyspaceNames.includes(keyspaceItem!.label as string)) {
+							keyspaceItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+							await vscode.commands.executeCommand('astra-vscode.getTablesAndDocsInKeyspace', keyspaceItem);
+						}
+					}
 				}
 			}
 		}
