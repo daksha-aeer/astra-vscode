@@ -367,13 +367,16 @@ export async function activate(context: vscode.ExtensionContext) {
 	})
 
 	async function refreshItems() {
-		await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
+		if (devOpsToken) {
+			await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 
-		for (const databaseItem of provider?.data ?? []) {
-			const databaseId = databaseItem.database!.id;
-			// Reconnect if token exists
-			if (databaseId in authTokens) {
-				provider.displayConnectedDatabaseOptions(databaseItem);
+			// Refresh connected databases
+			for (const databaseItem of provider?.data ?? []) {
+				const databaseId = databaseItem.database!.id;
+				// Reconnect if token exists
+				if (databaseId in authTokens) {
+					provider.displayConnectedDatabaseOptions(databaseItem);
+				}
 			}
 		}
 	}
