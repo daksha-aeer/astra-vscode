@@ -82,7 +82,12 @@ export async function activate(context: vscode.ExtensionContext) {
 		const databases = await getDatabases(devOpsToken!);
 		console.log('Fetched databases', databases);
 
-		provider.refresh(databases);
+		if (Array.isArray(databases)) {
+			provider.refresh(databases);
+		} else {
+			console.log('No databases, create one');
+		}
+
 	})
 
 	vscode.commands.registerCommand('astra-vscode.openUrlInBrowser', (url: string) => {

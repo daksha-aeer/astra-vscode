@@ -15,7 +15,7 @@ async function getSecureBundleUrl(id: string, devOpsToken: string): Promise<Bund
     }).then(res => res.json());
 }
 
-async function getDatabases(devOpsToken: string): Promise<Database[]> {
+async function getDatabases(devOpsToken: string): Promise<Database[] | Object> {
     return await fetch('https://api.astra.datastax.com/v2/databases?include=nonterminated', {
         headers: {
             Authorization: 'Bearer ' + devOpsToken,
