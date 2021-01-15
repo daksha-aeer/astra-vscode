@@ -7,6 +7,7 @@ import { Provider, AstraTreeItem } from './Provider';
 import { Database, TableDocuments } from './types';
 import {
 	createCollection,
+	createDocument,
 	getDatabaseAuthToken,
 	getDatabases,
 	getDevOpsToken,
@@ -403,6 +404,38 @@ export async function activate(context: vscode.ExtensionContext) {
 		} else {
 			vscode.window.showErrorMessage('No name provided');
 		}
+	})
+
+	vscode.commands.registerCommand('astra-vscode.createDocument', async (documentsGroupItem: AstraTreeItem) => {
+		const database = documentsGroupItem.database!;
+		const keyspace = documentsGroupItem.keyspace!;
+		const tableName = documentsGroupItem.tableName!;
+		const databaseToken = authTokens[database.id];
+
+		const documentBody = await vscode.window.showInputBox({
+			prompt: 'Document body',
+			placeHolder: '{"name": "jack"}',
+		})
+
+		if (documentBody) {
+			try {
+				const newDocumentResponse = await createDocument(
+					database.dataEndpointUrl, keyspace, tableName, databaseToken, documentBody
+				);
+				console.log('Document creation response', newDocumentResponse.body);
+				if (newDocumentResponse.status === 201) {
+					vscode.window.showInformationMessage('Collection created');
+					return await refreshItems();
+				} else {
+					vscode.window.showErrorMessage('Failed to create');
+				}
+			} catch (error) {
+				vscode.window.showErrorMessage('Failed to create');
+			}
+		} else {
+			vscode.window.showErrorMessage('No document body provided provided');
+		}
+
 	})
 
 	async function refreshItems() {

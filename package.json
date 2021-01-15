@@ -27,6 +27,7 @@
 		"onCommand:astra-vscode.parkDatabase",
 		"onCommand:astra-vscode.unparkDatabase",
 		"onCommand:astra-vscode.createCollection",
+		"onCommand:astra-vscode.createDocument",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -130,6 +131,11 @@
 				"command": "astra-vscode.createCollection",
 				"title": "Create collection",
 				"icon": "$(diff-insert)"
+			},
+			{
+				"command": "astra-vscode.createDocument",
+				"title": "Create document",
+				"icon": "$(diff-insert)"
 			}
 		],
 		"views": {
@@ -204,6 +210,11 @@
 				{
 					"command": "astra-vscode.createCollection",
 					"when": "view == databases-view && viewItem == connected-keyspace",
+					"group": "inline"
+				},
+				{
+					"command": "astra-vscode.createDocument",
+					"when": "view == databases-view && viewItem == documents",
 					"group": "inline"
 				}
 			]
