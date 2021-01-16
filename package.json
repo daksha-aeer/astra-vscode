@@ -55,11 +55,7 @@
 			},
 			{
 				"command": "astra-vscode.refreshUserDatabases",
-				"title": "Refresh databases",
-				"icon": {
-					"light": "resources/light/refresh.svg",
-					"dark": "resources/dark/refresh.svg"
-				}
+				"title": "Refresh databases"
 			},
 			{
 				"command": "astra-vscode.connectToDatabase",
@@ -150,10 +146,6 @@
 				{
 					"id": "databases-view",
 					"name": "Databases"
-				},
-				{
-					"id": "astra-playgrounds",
-					"name": "Playgrounds"
 				}
 			]
 		},
@@ -167,13 +159,6 @@
 			]
 		},
 		"menus": {
-			"view/title": [
-				{
-					"command": "astra-vscode.refreshUserDatabases",
-					"when": "view == databases-view",
-					"group": "navigation"
-				}
-			],
 			"editor/title": [
 				{
 					"command": "astra-vscode.runPlayground",
