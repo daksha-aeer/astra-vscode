@@ -3,6 +3,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as util from 'util';
 import fetch from 'cross-fetch';
+import { Client as AstraClient } from "cassandra-driver";
+
 import { Provider, AstraTreeItem } from './Provider';
 import { Database, TableDocuments } from './types';
 import {
@@ -460,12 +462,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('astra-vscode.runPlayground', async () => {
 		const editor = vscode.window.activeTextEditor;
-		const text = editor?.document.getText();
-		console.log('Got text', text);
+		const query = editor?.document.getText();
+		console.log('Got text', query);
 
 		const connectedDbNames: string[] = [];
 		const connectedDbs: { [databaseName: string]: Database } = {};
-		if (text) {
+		if (query) {
 			// Select connected DB
 			if (provider.data && provider.data.length > 0) {
 				for (const databaseItem of provider.data) {
@@ -482,8 +484,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				const dbName = await vscode.window.showQuickPick(connectedDbNames);
 				if (dbName) {
 					const selectedDb = connectedDbs[dbName];
-					console.log('DB selected', dbName);
-					console.log('DB username', selectedDb.info.user);
+					const userName = selectedDb.info.user;
 					let noPassword = false;
 					let password = context.globalState.get<string>(`passwords.${selectedDb.id}`);
 
@@ -502,7 +503,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
 					const bundlePath = await getBundlePath(selectedDb);
 					if (bundlePath) {
-						console.log('Found bundle path')
+						console.log('Found bundle path');
+						const response = await runCql(userName, password, bundlePath, query);
 					}
 				}
 
@@ -510,24 +512,24 @@ export async function activate(context: vscode.ExtensionContext) {
 				vscode.window.showErrorMessage('Please connect to a database');
 			}
 		}
-
-		// console.log('Running playground');
-		// if (
-		// 	!activeTextEditor
-		// ) {
-		// 	console.log('No active editor');
-
-		// 	return;
-		// } else if (activeTextEditor.document.languageId !== 'cql') {
-		// 	console.log('Not CQL');
-		// }
-		// const text = activeTextEditor.document.getText();
-		// console.log('Got text', text);
-		// const selections = activeTextEditor.selections;
-		// console.log('Got selection', selections);
-
-		// const selections = vscode.TextEditor.activeTextEditor.selections;
 	})
+
+	async function runCql(username: string, password: string, bundlePath: string, query: string) {
+		console.log('Connecting to Astra');
+		const client = new AstraClient({
+			cloud: {
+				secureConnectBundle: bundlePath,
+			},
+			credentials: { username, password },
+		});
+
+		await client.connect();
+		console.log('Executing query');
+		const response = await client.execute(query);
+		await client.shutdown();
+		console.log('Query response', response);
+		return response;
+	}
 
 	async function refreshItems() {
 		if (devOpsToken) {

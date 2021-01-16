@@ -262,6 +262,7 @@
 		"webpack-cli": "^4.2.0"
 	},
 	"dependencies": {
+		"cassandra-driver": "^4.6.1",
 		"cross-fetch": "^3.0.6"
 	}
 }
