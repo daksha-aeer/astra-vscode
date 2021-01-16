@@ -7,6 +7,7 @@
 		"vscode": "^1.52.0"
 	},
 	"categories": [
+		"Programming Languages",
 		"Other"
 	],
 	"activationEvents": [
@@ -28,6 +29,7 @@
 		"onCommand:astra-vscode.unparkDatabase",
 		"onCommand:astra-vscode.createCollection",
 		"onCommand:astra-vscode.createDocument",
+		"onCommand:astra-vscode.runPlayground",
 		"onView:databases-view"
 	],
 	"main": "./dist/extension.js",
@@ -136,6 +138,11 @@
 				"command": "astra-vscode.createDocument",
 				"title": "Create document",
 				"icon": "$(diff-insert)"
+			},
+			{
+				"command": "astra-vscode.runPlayground",
+				"title": "Run playground",
+				"icon": "$(run)"
 			}
 		],
 		"views": {
@@ -165,6 +172,13 @@
 					"command": "astra-vscode.refreshUserDatabases",
 					"when": "view == databases-view",
 					"group": "navigation"
+				}
+			],
+			"editor/title": [
+				{
+					"command": "astra-vscode.runPlayground",
+					"group": "navigation",
+					"when": "editorLangId == cql"
 				}
 			],
 			"view/item/context": [

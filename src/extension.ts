@@ -25,6 +25,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	let devOpsToken: string | undefined = undefined;
 	let authTokens: { [databaseId: string]: string } = {};
 	let connectedKeyspaces: string[] = [];
+	let activeTextEditor: vscode.TextEditor | undefined = undefined;
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
 
@@ -185,7 +186,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (database: Database) => {
+	async function getBundlePath(database: Database) {
 		const bundleName = `secure-bundle-${database.info.name}.zip`;
 		const bundleLocation = context.globalStorageUri.with({
 			path: path.posix.join(context.globalStorageUri.path, bundleName)
@@ -202,20 +203,31 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 		console.log('Bundle found', bundlePresent);
 
-		// Download bundle if not present
-		if (!bundlePresent) {
-			const bundleResponse = await getSecureBundleUrl(database.id, devOpsToken!);
-			const secureBundleURL = bundleResponse.downloadURL;
-			const response = await fetch(secureBundleURL);
-			const buffer = Buffer.from(await response.arrayBuffer());
-			await vscode.workspace.fs.writeFile(bundleLocation, buffer);
+		if (bundlePresent) {
+			return bundleLocation.path;
+		} else {
+			try {
+				const bundleResponse = await getSecureBundleUrl(database.id, devOpsToken!);
+				const secureBundleURL = bundleResponse.downloadURL;
+				const response = await fetch(secureBundleURL);
+				const buffer = Buffer.from(await response.arrayBuffer());
+				await vscode.workspace.fs.writeFile(bundleLocation, buffer);
+				return bundleLocation.path;
+			} catch (error) {
+				console.log('Bundle download failed');
+				return undefined;
+			}
 		}
-
-		// Run cqlsh
-		const password = context.globalState.get<string>(`passwords.${database.id}`)!;
-		const shell = vscode.window.createTerminal('CQL shell');
-		shell.sendText(`cqlsh -u ${database.info.user} -p ${password} -b "${bundleLocation.path}"`);
-		shell.show();
+	}
+	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (database: Database) => {
+		const bundlePath = await getBundlePath(database);
+		if (bundlePath) {
+			// Run cqlsh
+			const password = context.globalState.get<string>(`passwords.${database.id}`)!;
+			const shell = vscode.window.createTerminal('CQL shell');
+			shell.sendText(`cqlsh -u ${database.info.user} -p ${password} -b "${bundlePath}"`);
+			shell.show();
+		}
 	});
 
 	vscode.commands.registerCommand('astra-vscode.getTablesAndDocsInKeyspace', async (keyspaceItem: AstraTreeItem) => {
@@ -438,6 +450,85 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	})
 
+	// vscode.window.onDidChangeActiveTextEditor((editor) => {
+	// 	console.log('Active editor changed');
+	// 	if (editor?.document.languageId !== 'Log') {
+	// 		activeTextEditor = editor;
+	// 		console.log('Active editor path', editor?.document.uri?.path);
+	// 	}
+	// })
+
+	vscode.commands.registerCommand('astra-vscode.runPlayground', async () => {
+		const editor = vscode.window.activeTextEditor;
+		const text = editor?.document.getText();
+		console.log('Got text', text);
+
+		const connectedDbNames: string[] = [];
+		const connectedDbs: { [databaseName: string]: Database } = {};
+		if (text) {
+			// Select connected DB
+			if (provider.data && provider.data.length > 0) {
+				for (const databaseItem of provider.data) {
+					// if (databaseItem.contextValue === 'connected-database') {
+					// 	const databaseName = databaseItem.label as string;
+					// 	connectedDbNames.push(databaseName);
+					// 	connectedDbs[databaseName] = databaseItem.database!;
+					// }
+
+					const databaseName = databaseItem.label as string;
+					connectedDbNames.push(databaseName);
+					connectedDbs[databaseName] = databaseItem.database!;
+				}
+				const dbName = await vscode.window.showQuickPick(connectedDbNames);
+				if (dbName) {
+					const selectedDb = connectedDbs[dbName];
+					console.log('DB selected', dbName);
+					console.log('DB username', selectedDb.info.user);
+					let noPassword = false;
+					let password = context.globalState.get<string>(`passwords.${selectedDb.id}`);
+
+					if (!password) {
+						noPassword = true;
+						const passwordInput = await vscode.window.showInputBox({
+							prompt: 'Database password',
+						})
+						if (passwordInput) {
+							password = passwordInput;
+						} else {
+							return vscode.window.showErrorMessage('No password provided');
+						}
+					}
+					console.log('Selected db password', password);
+
+					const bundlePath = await getBundlePath(selectedDb);
+					if (bundlePath) {
+						console.log('Found bundle path')
+					}
+				}
+
+			} else {
+				vscode.window.showErrorMessage('Please connect to a database');
+			}
+		}
+
+		// console.log('Running playground');
+		// if (
+		// 	!activeTextEditor
+		// ) {
+		// 	console.log('No active editor');
+
+		// 	return;
+		// } else if (activeTextEditor.document.languageId !== 'cql') {
+		// 	console.log('Not CQL');
+		// }
+		// const text = activeTextEditor.document.getText();
+		// console.log('Got text', text);
+		// const selections = activeTextEditor.selections;
+		// console.log('Got selection', selections);
+
+		// const selections = vscode.TextEditor.activeTextEditor.selections;
+	})
+
 	async function refreshItems() {
 		if (devOpsToken) {
 			await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
@@ -466,10 +557,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Cron job to refresh databases
 	const REFRESH_INTERVAL = 25 * 1000; // 30 seconds
-	setInterval(async () => {
-		console.log("Cron job running");
-		await refreshItems();
-	}, REFRESH_INTERVAL);
+	// setInterval(async () => {
+	// 	console.log("Cron job running");
+	// 	await refreshItems();
+	// }, REFRESH_INTERVAL);
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
