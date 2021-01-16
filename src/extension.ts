@@ -4,7 +4,6 @@ import * as fs from 'fs';
 import * as util from 'util';
 import fetch from 'cross-fetch';
 import { Client as AstraClient } from "cassandra-driver";
-
 import { Provider, AstraTreeItem } from './Provider';
 import { Database, TableDocuments } from './types';
 import {
@@ -452,14 +451,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	})
 
-	// vscode.window.onDidChangeActiveTextEditor((editor) => {
-	// 	console.log('Active editor changed');
-	// 	if (editor?.document.languageId !== 'Log') {
-	// 		activeTextEditor = editor;
-	// 		console.log('Active editor path', editor?.document.uri?.path);
-	// 	}
-	// })
-
 	vscode.commands.registerCommand('astra-vscode.runPlayground', async () => {
 		const editor = vscode.window.activeTextEditor;
 		const query = editor?.document.getText();
@@ -471,12 +462,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			// Select connected DB
 			if (provider.data && provider.data.length > 0) {
 				for (const databaseItem of provider.data) {
-					// if (databaseItem.contextValue === 'connected-database') {
-					// 	const databaseName = databaseItem.label as string;
-					// 	connectedDbNames.push(databaseName);
-					// 	connectedDbs[databaseName] = databaseItem.database!;
-					// }
-
 					const databaseName = databaseItem.label as string;
 					connectedDbNames.push(databaseName);
 					connectedDbs[databaseName] = databaseItem.database!;
@@ -485,8 +470,9 @@ export async function activate(context: vscode.ExtensionContext) {
 				if (dbName) {
 					const selectedDb = connectedDbs[dbName];
 					const userName = selectedDb.info.user;
+					const dbId = selectedDb.id;
 					let noPassword = false;
-					let password = context.globalState.get<string>(`passwords.${selectedDb.id}`);
+					let password = context.globalState.get<string>(`passwords.${dbId}`);
 
 					if (!password) {
 						noPassword = true;
@@ -495,6 +481,7 @@ export async function activate(context: vscode.ExtensionContext) {
 						})
 						if (passwordInput) {
 							password = passwordInput;
+							await context.globalState.update(`passwords.${dbId}`, password);
 						} else {
 							return vscode.window.showErrorMessage('No password provided');
 						}
@@ -505,6 +492,32 @@ export async function activate(context: vscode.ExtensionContext) {
 					if (bundlePath) {
 						console.log('Found bundle path');
 						const response = await runCql(userName, password, bundlePath, query);
+						const respData = response.rows.map((row) => {
+							const rowData: { [key: string]: string | number } = {};
+							for (const rowItemKey in row) {
+								let rowItem = row[rowItemKey];
+								if (typeof rowItem === 'object') {
+									rowItem = JSON.stringify(rowItem);
+								}
+								rowData[rowItemKey] = rowItem;
+							}
+							return rowData;
+						})
+						console.log('Cleaned data', respData);
+						const panel = vscode.window.createWebviewPanel(
+							'cqlResponse',
+							'CQL response',
+							vscode.ViewColumn.Two,
+							{
+								enableScripts: true,
+								retainContextWhenHidden: true,
+							}
+						);
+						const filePath = path.join(context.extensionPath, 'src', 'webviews', 'cql-response.html');
+						const fileContents = await readFile(filePath);
+						const html = fileContents.toString();
+						panel.webview.html = html;
+						await panel.webview.postMessage(respData);
 					}
 				}
 
@@ -559,10 +572,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Cron job to refresh databases
 	const REFRESH_INTERVAL = 25 * 1000; // 30 seconds
-	// setInterval(async () => {
-	// 	console.log("Cron job running");
-	// 	await refreshItems();
-	// }, REFRESH_INTERVAL);
+	setInterval(async () => {
+		console.log("Cron job running");
+		await refreshItems();
+	}, REFRESH_INTERVAL);
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
