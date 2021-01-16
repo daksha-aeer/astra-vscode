@@ -572,10 +572,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Cron job to refresh databases
 	const REFRESH_INTERVAL = 25 * 1000; // 30 seconds
-	setInterval(async () => {
-		console.log("Cron job running");
-		await refreshItems();
-	}, REFRESH_INTERVAL);
+	// setInterval(async () => {
+	// 	console.log("Cron job running");
+	// 	await refreshItems();
+	// }, REFRESH_INTERVAL);
 
 	await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
 	await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');

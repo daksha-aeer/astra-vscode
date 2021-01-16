@@ -39,39 +39,60 @@ export class TreeProvider implements vscode.TreeDataProvider<AstraTreeItem> {
             databaseItem.contextValue = 'active-database';
             databaseItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
 
+            const graphQlItem = new AstraTreeItem('GraphQL', {
+                title: 'GraphQL schema',
+                command: 'astra-vscode.openGraphQLInWebview',
+                arguments: [`${database.graphqlUrl}-schema`],
+            })
+            graphQlItem.iconPath = {
+                light: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'graphql.svg'),
+                dark: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'graphql.svg'),
+            }
+
+            const restItem = new AstraTreeItem('REST', {
+                title: 'Swagger UI for REST',
+                command: 'astra-vscode.openSwaggerInWebview',
+                arguments: [`https://${database.id}-${database.info.region}.apps.astra.datastax.com/api/rest/swagger.json`],
+            })
+            restItem.iconPath = {
+                light: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'swagger.svg'),
+                dark: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'swagger.svg'),
+            }
+
+            const bundleItem = new AstraTreeItem('Download Secure Bundle', {
+                title: 'Download Secure Bundle',
+                command: 'astra-vscode.downloadSecureConnectBundle',
+                arguments: [database.id],
+            })
+            bundleItem.iconPath = new vscode.ThemeIcon('cloud-download');
+
             // API group items
             const apiChildren = [
-                new AstraTreeItem('GraphQL schema', {
-                    title: 'GraphQL schema',
-                    command: 'astra-vscode.openGraphQLInWebview',
-                    arguments: [`${database.graphqlUrl}-schema`],
-                }),
-                new AstraTreeItem('Swagger UI for REST', {
-                    title: 'Swagger UI for REST',
-                    command: 'astra-vscode.openSwaggerInWebview',
-                    arguments: [`https://${database.id}-${database.info.region}.apps.astra.datastax.com/api/rest/swagger.json`],
-                }),
-                new AstraTreeItem('Download Secure Bundle', {
-                    title: 'Download Secure Bundle',
-                    command: 'astra-vscode.downloadSecureConnectBundle',
-                    arguments: [database.id],
-                }),
+                graphQlItem,
+                restItem,
+                bundleItem,
             ]
             const apiGroupItem = new AstraTreeItem('API', undefined, apiChildren);
 
             // Database management items
-            const manageDatabaseChildren = [
-                new AstraTreeItem('DataStax Studio', {
-                    title: 'Launch DataStax Studio',
-                    command: 'astra-vscode.openUrlInBrowser',
-                    arguments: [database.studioUrl],
-                }),
-                new AstraTreeItem('Grafana', {
-                    title: 'Monitor database health on Grafana',
-                    command: 'astra-vscode.openUrlInBrowser',
-                    arguments: [database.grafanaUrl],
-                }),
-            ]
+            const studioItem = new AstraTreeItem('DataStax Studio', {
+                title: 'Launch DataStax Studio',
+                command: 'astra-vscode.openUrlInBrowser',
+                arguments: [database.studioUrl],
+            })
+            studioItem.iconPath = new vscode.ThemeIcon('notebook');
+
+            const grafanaItem = new AstraTreeItem('Grafana', {
+                title: 'Monitor database health on Grafana',
+                command: 'astra-vscode.openUrlInBrowser',
+                arguments: [database.grafanaUrl],
+            })
+            grafanaItem.iconPath = {
+                light: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'grafana.svg'),
+                dark: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'grafana.svg'),
+            }
+
+            const manageDatabaseChildren = [studioItem, grafanaItem];
             const manageGroupItem = new AstraTreeItem('Manage', undefined, manageDatabaseChildren);
 
             databaseItem.children = [apiGroupItem, manageGroupItem];
@@ -82,6 +103,10 @@ export class TreeProvider implements vscode.TreeDataProvider<AstraTreeItem> {
                 keyspaceItem.database = database;
                 keyspaceItem.keyspace = keyspace;
                 keyspaceItem.contextValue = 'keyspace';
+                keyspaceItem.iconPath = {
+                    light: path.join(__filename, '..', '..', 'resources', 'light', 'keyspace.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'dark', 'keyspace.svg'),
+                }
                 return keyspaceItem;
             })
 
@@ -105,13 +130,15 @@ export class TreeProvider implements vscode.TreeDataProvider<AstraTreeItem> {
                         command: 'astra-vscode.copyDatabaseAuthToken',
                         arguments: [database.id],
                     });
+                    newChild.iconPath = new vscode.ThemeIcon('files');
                 } break;
                 case 'Manage': {
-                    newChild = new AstraTreeItem('Launch CQL Shell', {
+                    newChild = new AstraTreeItem('CQL Shell', {
                         title: 'Launch CQL Shell',
                         command: 'astra-vscode.openCqlsh',
                         arguments: [database],
                     })
+                    newChild.iconPath = new vscode.ThemeIcon('terminal');
                 } break;
                 case 'Keyspaces': {
                     for (const keyspaceItem of databaseChildItem.children!) {
@@ -169,6 +196,11 @@ export class TreeProvider implements vscode.TreeDataProvider<AstraTreeItem> {
                 const tableItem = new AstraTreeItem(tableName, undefined, tableChildren);
                 tableItem.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
                 const tableDocuments = documentsPerTable[tableName];
+
+                tableItem.iconPath = {
+                    light: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'Database.svg'),
+                    dark: path.join(__filename, '..', '..', 'resources', 'theme-agnostic', 'Database.svg'),
+                }
 
                 // Table documents
                 if (tableDocuments) {
