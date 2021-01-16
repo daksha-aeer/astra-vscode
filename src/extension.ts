@@ -26,10 +26,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	let devOpsToken: string | undefined = undefined;
 	let authTokens: { [databaseId: string]: string } = {};
 	let connectedKeyspaces: string[] = [];
-	let activeTextEditor: vscode.TextEditor | undefined = undefined;
-	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
-	console.log('Starting Astra extension');
-
 	const provider = new TreeProvider();
 	vscode.window.registerTreeDataProvider(
 		'databases-view',
@@ -52,16 +48,13 @@ export async function activate(context: vscode.ExtensionContext) {
 		} catch (error) {
 			console.error('Failed to open document', error);
 		}
-
-	});
-
-	vscode.commands.registerCommand('astra-vscode.helloWorld', () => {
-		vscode.window.showInformationMessage('Hello World from Astra VSCode!');
 	});
 
 	vscode.commands.registerCommand('astra-vscode.setServiceCredentials', async () => {
 		console.log('Setting service credentials')
-
+		const sampleCredentials = {
+			clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret"
+		}
 		const userInput = await vscode.window.showInputBox({
 			prompt: 'Paste the credentials in the above format.',
 			placeHolder: JSON.stringify(sampleCredentials),
