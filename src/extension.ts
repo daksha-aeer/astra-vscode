@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as util from 'util';
 import fetch from 'cross-fetch';
 import { Client as AstraClient } from "cassandra-driver";
-import { Provider, AstraTreeItem } from './Provider';
+import { TreeProvider, AstraTreeItem } from './TreeProvider';
 import { Database, TableDocuments } from './types';
 import {
 	createCollection,
@@ -30,7 +30,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const sampleCredentials = { clientId: "your-id", clientName: "user@domain.com", clientSecret: "secret" }
 	console.log('Starting Astra extension');
 
-	const provider = new Provider();
+	const provider = new TreeProvider();
 	vscode.window.registerTreeDataProvider(
 		'databases-view',
 		provider

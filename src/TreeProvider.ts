@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { Database, DocumentsResponse, TableDocuments, TableSchema } from './types';
 
-export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
+export class TreeProvider implements vscode.TreeDataProvider<AstraTreeItem> {
 
     private _onDidChangeTreeData = new vscode.EventEmitter<AstraTreeItem | undefined | null | void>();
     readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -133,7 +133,7 @@ export class Provider implements vscode.TreeDataProvider<AstraTreeItem> {
         tables?: TableSchema[], pageState?: string
     ) {
         if (tables && tables.length > 0) {
-            keyspaceItem.children = tables.map((table, index) => {
+            keyspaceItem.children = tables.map((table) => {
                 // Table schema
                 const tableColumnItems = table.columns.map((column) => {
                     const columnItem = new AstraTreeItem(column.name);
