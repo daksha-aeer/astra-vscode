@@ -214,13 +214,18 @@ export async function activate(context: vscode.ExtensionContext) {
   // Display CQL shell for the database using VSCode integrated terminal
   vscode.commands.registerCommand('astra-vscode.openCqlsh',
     async (database: Database) => {
+      console.log('Running shell');
       const bundlePath = await getBundlePath(database);
+      console.log('Got bundle path', bundlePath);
       if (bundlePath) {
         // Run cqlsh
+
         const password = context.globalState.get<string>(`passwords.${database.id}`)!;
         const shell = vscode.window.createTerminal('CQL shell');
         shell.sendText(`cqlsh -u ${database.info.user} -p ${password} -b "${bundlePath}"`);
         shell.show();
+      } else {
+        console.log('No bundle to launch shell');
       }
     });
 
@@ -552,22 +557,26 @@ export async function activate(context: vscode.ExtensionContext) {
     const bundleLocation = storageLocation.with({
       path: path.posix.join(storageLocation.path, bundleName),
     });
-
-    const bundles = await vscode.workspace.fs.readDirectory(storageLocation);
-
-    // Check if bundle exists
+    console.log('Searching bundle in', bundleLocation);
     let bundlePresent = false;
-    for (const [name, type] of bundles) {
-      if (name === bundleName && type === vscode.FileType.File) {
-        bundlePresent = true;
+    try {
+      const bundles = await vscode.workspace.fs.readDirectory(storageLocation);
+      console.log('Got bundles in directory', bundles);
+      for (const [name, type] of bundles) {
+        if (name === bundleName && type === vscode.FileType.File) {
+          bundlePresent = true;
+        }
       }
+      console.log('Bundle found', bundlePresent);
+    } catch (error) {
+      console.error(error);
     }
-    console.log('Bundle found', bundlePresent);
 
     if (bundlePresent) {
       return bundleLocation.path;
     }
     // Download bundle if it does not present
+    console.log('Bundle not saved, downloading');
     try {
       const bundleResponse = await getSecureBundleUrl(database.id, devOpsToken!);
       const secureBundleURL = bundleResponse.downloadURL;
