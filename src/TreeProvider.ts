@@ -314,7 +314,7 @@ export class TreeProvider implements vscode.TreeDataProvider<AstraTreeItem> {
         new AstraTreeItem(documentId, {
           title: 'View document',
           command: 'astra-vscode.viewDocument',
-          arguments: [documentId, documents[documentId].data],
+          arguments: [documentId, documents[documentId]],
         }),
       );
     }

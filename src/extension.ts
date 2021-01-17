@@ -52,7 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
       const uri = vscode.Uri.parse(`${documentsScheme}:${documentName}.json?body=${formattedBody}`);
       try {
         const doc = await vscode.workspace.openTextDocument(uri);
-        await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Two });
+        await vscode.window.showTextDocument(doc);
       } catch (error) {
         console.error('Failed to open document', error);
       }
@@ -316,7 +316,6 @@ export async function activate(context: vscode.ExtensionContext) {
           databaseToken,
           pageState,
         );
-        console.log('Got documents', documentResponse);
         const newPageState = documentResponse.pageState;
         console.log('Got new page State', newPageState);
 
