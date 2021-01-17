@@ -178,7 +178,7 @@ async function createDocument(
 }
 
 /**
- * Document API
+ * GraphQL API
  */
 
 /**
