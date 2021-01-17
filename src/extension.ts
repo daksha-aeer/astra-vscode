@@ -180,39 +180,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	async function getBundlePath(database: Database) {
-		const bundleName = `secure-bundle-${database.info.name}.zip`;
-		const bundleLocation = context.globalStorageUri.with({
-			path: path.posix.join(context.globalStorageUri.path, bundleName)
-		});
-
-		const bundles = await vscode.workspace.fs.readDirectory(context.globalStorageUri);
-		console.log('Read bundles', bundles.toString());
-
-		let bundlePresent = false;
-		for (const [name, type] of bundles) {
-			if (name === bundleName && type === vscode.FileType.File) {
-				bundlePresent = true;
-			}
-		}
-		console.log('Bundle found', bundlePresent);
-
-		if (bundlePresent) {
-			return bundleLocation.path;
-		} else {
-			try {
-				const bundleResponse = await getSecureBundleUrl(database.id, devOpsToken!);
-				const secureBundleURL = bundleResponse.downloadURL;
-				const response = await fetch(secureBundleURL);
-				const buffer = Buffer.from(await response.arrayBuffer());
-				await vscode.workspace.fs.writeFile(bundleLocation, buffer);
-				return bundleLocation.path;
-			} catch (error) {
-				console.log('Bundle download failed');
-				return undefined;
-			}
-		}
-	}
 	vscode.commands.registerCommand('astra-vscode.openCqlsh', async (database: Database) => {
 		const bundlePath = await getBundlePath(database);
 		if (bundlePath) {
@@ -350,7 +317,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		try {
 			const parkResponse = await parkDatabase(database.id, devOpsToken!);
 			console.log('Parking response', parkResponse);
-			setTimeout(refreshItems, 10000);
+			setTimeout(refreshTreeItems, 10000);
 		} catch (error) {
 			console.log('Failed to park', error);
 		}
@@ -363,7 +330,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		try {
 			const terminateResponse = await terminateDatabase(database.id, devOpsToken!);
 			console.log('Termination response', terminateResponse);
-			setTimeout(refreshItems, 10000);
+			setTimeout(refreshTreeItems, 10000);
 		} catch (error) {
 			console.log('Failed to terminate', error);
 		}
@@ -376,7 +343,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		try {
 			const unparkResponse = await unparkDatabase(database.id, devOpsToken!);
 			console.log('Unpark response', unparkResponse);
-			setTimeout(refreshItems, 10000);
+			setTimeout(refreshTreeItems, 10000);
 		} catch (error) {
 			console.log('Failed to unpark', error);
 		}
@@ -400,7 +367,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				console.log('Collection creation response', newCollectionResponse.body);
 				if (newCollectionResponse.status === 201) {
 					vscode.window.showInformationMessage('Collection created');
-					return await refreshItems();
+					return await refreshTreeItems();
 				} else {
 					vscode.window.showErrorMessage('Failed to create');
 				}
@@ -431,7 +398,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				console.log('Document creation response', newDocumentResponse.body);
 				if (newDocumentResponse.status === 201) {
 					vscode.window.showInformationMessage('Collection created');
-					return await refreshItems();
+					return await refreshTreeItems();
 				} else {
 					vscode.window.showErrorMessage('Failed to create');
 				}
@@ -520,6 +487,40 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	})
 
+	async function getBundlePath(database: Database) {
+		const bundleName = `secure-bundle-${database.info.name}.zip`;
+		const bundleLocation = context.globalStorageUri.with({
+			path: path.posix.join(context.globalStorageUri.path, bundleName)
+		});
+
+		const bundles = await vscode.workspace.fs.readDirectory(context.globalStorageUri);
+		console.log('Read bundles', bundles.toString());
+
+		let bundlePresent = false;
+		for (const [name, type] of bundles) {
+			if (name === bundleName && type === vscode.FileType.File) {
+				bundlePresent = true;
+			}
+		}
+		console.log('Bundle found', bundlePresent);
+
+		if (bundlePresent) {
+			return bundleLocation.path;
+		} else {
+			try {
+				const bundleResponse = await getSecureBundleUrl(database.id, devOpsToken!);
+				const secureBundleURL = bundleResponse.downloadURL;
+				const response = await fetch(secureBundleURL);
+				const buffer = Buffer.from(await response.arrayBuffer());
+				await vscode.workspace.fs.writeFile(bundleLocation, buffer);
+				return bundleLocation.path;
+			} catch (error) {
+				console.log('Bundle download failed');
+				return undefined;
+			}
+		}
+	}
+
 	async function runCql(username: string, password: string, bundlePath: string, query: string) {
 		console.log('Connecting to Astra');
 		const client = new AstraClient({
@@ -537,7 +538,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		return response;
 	}
 
-	async function refreshItems() {
+	async function refreshTreeItems() {
 		if (devOpsToken) {
 			await vscode.commands.executeCommand('astra-vscode.refreshUserDatabases');
 
