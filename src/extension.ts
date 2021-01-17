@@ -45,7 +45,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // View JSON document in new window
   vscode.commands.registerCommand('astra-vscode.viewDocument',
-    async (documentName: string, documentBody: any) => {
+    async (documentName: string, documentBody: Object) => {
       console.log('Opening document', documentName);
       console.log('Document body', documentBody);
       const formattedBody = JSON.stringify(documentBody, null, 2);
@@ -345,7 +345,7 @@ export async function activate(context: vscode.ExtensionContext) {
       await vscode.commands.executeCommand(
         'astra-vscode.viewDocument',
         'search-results',
-        JSON.stringify(documentResponse.data),
+        documentResponse.data,
       );
     });
 
