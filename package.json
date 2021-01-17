@@ -3,6 +3,7 @@
 	"displayName": "Astra VSCode",
 	"description": "Manage your DataStax Astra Cassandra databases right from VSCode!",
 	"version": "0.0.1",
+	"publisher": "gg",
 	"engines": {
 		"vscode": "^1.52.0"
 	},
