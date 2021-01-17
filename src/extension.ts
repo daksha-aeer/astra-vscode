@@ -374,7 +374,7 @@ export async function activate(context: vscode.ExtensionContext) {
           console.log('Collection creation response', newCollectionResponse.body);
           if (newCollectionResponse.status === 201) {
             vscode.window.showInformationMessage('Collection created');
-            return await refreshTreeItems();
+            return setTimeout(refreshTreeItems, 2000);
           }
           vscode.window.showErrorMessage('Failed to create');
         } catch (error) {
@@ -406,7 +406,7 @@ export async function activate(context: vscode.ExtensionContext) {
           console.log('Document creation response', newDocumentResponse.body);
           if (newDocumentResponse.status === 201) {
             vscode.window.showInformationMessage('Collection created');
-            return await refreshTreeItems();
+            return setTimeout(refreshTreeItems, 2000);
           }
           vscode.window.showErrorMessage('Failed to create');
         } catch (error) {
