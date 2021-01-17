@@ -194,7 +194,7 @@ export class TreeProvider implements vscode.TreeDataProvider<AstraTreeItem> {
    */
   displayTablesAndDocsForKeyspace(
     keyspaceItem: AstraTreeItem, documentsPerTable: TableDocuments,
-    tables?: TableSchema[], pageState?: string,
+    pageStatePerTable: { [tableName: string]: string | undefined }, tables?: TableSchema[],
   ) {
     if (tables && tables.length > 0) {
       keyspaceItem.children = tables.map((table) => {
@@ -266,6 +266,7 @@ export class TreeProvider implements vscode.TreeDataProvider<AstraTreeItem> {
           documentsGroupItem.database = keyspaceItem.database;
           documentsGroupItem.keyspace = keyspaceItem.keyspace;
           documentsGroupItem.tableName = tableName;
+          const pageState = pageStatePerTable[tableName];
           if (pageState) {
             documentChildren.push(
               new AstraTreeItem('Load more...', {

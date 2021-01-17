@@ -248,6 +248,7 @@ export async function activate(context: vscode.ExtensionContext) {
         const tables = tableResponse.data?.keyspace.tables;
 
         const documentsPerTable: TableDocuments = {};
+        const pageStatePerTable: { [tableName: string]: string | undefined } = {};
         let pageState: string | undefined;
         // TODO when no tables
         if (tables && Array.isArray(tables) && tables.length > 0) {
@@ -265,6 +266,7 @@ export async function activate(context: vscode.ExtensionContext) {
               pageState = documentResponse.pageState;
               console.log('Got pageState', pageState);
               documentsPerTable[table.name] = documentResponse?.data;
+              pageStatePerTable[table.name] = pageState;
             } catch (error) {
               console.log('No documents for this table');
             }
@@ -277,7 +279,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
         connectedKeyspaces.push(keyspace);
         treeProvider.displayTablesAndDocsForKeyspace(
-          keyspaceItem, documentsPerTable, tables, pageState,
+          keyspaceItem, documentsPerTable, pageStatePerTable, tables,
         );
       } catch (error) {
         console.error('Failed to get tables', error);
@@ -611,10 +613,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Cron job to refresh databases
   const REFRESH_INTERVAL = 25 * 1000; // 30 seconds
-  setInterval(async () => {
-    console.log('Cron job running');
-    await refreshTreeItems();
-  }, REFRESH_INTERVAL);
+  // setInterval(async () => {
+  //   console.log('Cron job running');
+  //   await refreshTreeItems();
+  // }, REFRESH_INTERVAL);
 
   // Refresh token and fetch databases when extension is started
   await vscode.commands.executeCommand('astra-vscode.refreshDevOpsToken');
